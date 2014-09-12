@@ -1,6 +1,5 @@
 #include "g_local.h"
 
-
 /*
 =================
 check_dodge
@@ -435,6 +434,9 @@ static void Grenade_Explode (edict_t *ent)
 
 static void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+	int			i;
+
+
 	if (other == ent->owner)
 		return;
 
@@ -457,11 +459,57 @@ static void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurfa
 		{
 			gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/grenlb1b.wav"), 1, ATTN_NORM, 0);
 		}
+		// At this point, the grenade has hit a surface
+
+		VectorClear (ent->velocity) ;
+		VectorClear (ent->avelocity) ;
+
+		// We don't want the grenade to be affected by the big G.
+		ent->movetype = MOVETYPE_NONE;
+
 		return;
 	}
 
 	ent->enemy = other;
 	Grenade_Explode (ent);
+}
+
+edict_t *grenade_FindPlayer (edict_t *from, vec3_t org, float rad)
+{
+	vec3_t	eorg;
+	int		j;
+
+	if (!from)
+		from = g_edicts;
+	else
+		from++;
+	for ( ; from < &g_edicts[globals.num_edicts]; from++)
+	{
+		if(!from->client)
+			continue;
+		for (j=0 ; j<3 ; j++)
+			eorg[j] = org[j] - (from->s.origin[j] + (from->mins[j] + from->maxs[j])*0.5);
+		if (VectorLength(eorg) > rad)
+			continue;
+		return from;
+	}
+	return NULL;
+}
+
+static void grenade_think (edict_t *ent)
+{
+	edict_t *motion = NULL;	// is someone around?
+
+	motion = grenade_FindPlayer(motion, ent->s.origin, 175) ;
+
+	if(motion == NULL || !visible(ent, motion))
+	{
+		ent->nextthink = level.time + 1;
+		return;
+	}
+
+	ent->think = Grenade_Explode ;
+	ent->nextthink = level.time + 0.1 ;
 }
 
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius)
@@ -521,8 +569,8 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	grenade->s.modelindex = gi.modelindex ("models/objects/grenade2/tris.md2");
 	grenade->owner = self;
 	grenade->touch = Grenade_Touch;
-	grenade->nextthink = level.time + timer;
-	grenade->think = Grenade_Explode;
+	grenade->nextthink = level.time + 3;
+	grenade->think = grenade_think;
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "hgrenade";
