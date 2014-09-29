@@ -880,7 +880,6 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
-
 /*
 =================
 ClientCommand
@@ -966,6 +965,39 @@ void ClientCommand (edict_t *ent)
 		Cmd_PutAway_f (ent);
 	else if (Q_stricmp (cmd, "wave") == 0)
 		Cmd_Wave_f (ent);
+	else if (Q_stricmp (cmd, "class1") == 0)
+    {
+            ent->client->resp.classVar = 1;
+            EndObserverMode(ent);
+    }
+    else if (Q_stricmp (cmd, "class2") == 0) 
+    {
+            ent->client->resp.classVar = 2;
+            EndObserverMode(ent);
+    }
+	else if (Q_stricmp (cmd, "class3") == 0)
+    {
+            ent->client->resp.classVar = 3;
+            EndObserverMode(ent);
+    }
+	else if (Q_stricmp (cmd, "class4") == 0)
+    {
+            ent->client->resp.classVar = 4;
+            EndObserverMode(ent);
+    }
+    else if (Q_stricmp (cmd, "class") == 0) 
+    {
+        if (ent->client->resp.classVar == 1)
+            gi.cprintf(ent, PRINT_HIGH, "You are Soldier.\n");
+        else if (ent->client->resp.classVar == 2)
+            gi.cprintf(ent, PRINT_HIGH, "You are Heavy.\n");
+		else if (ent->client->resp.classVar == 3)
+            gi.cprintf(ent, PRINT_HIGH, "You are Sniper.\n");
+		else if (ent->client->resp.classVar == 4)
+            gi.cprintf(ent, PRINT_HIGH, "You are Mutant.\n");
+        else
+            gi.cprintf(ent, PRINT_HIGH, "You are an OBSERVER.\n");
+    }
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
 	else	// anything that doesn't match a command will be a chat

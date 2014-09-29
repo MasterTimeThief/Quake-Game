@@ -855,6 +855,7 @@ typedef struct
 	vec3_t		cmd_angles;			// angles sent over in the last command
 
 	qboolean	spectator;			// client is a spectator
+	int			classVar;				//added for the class variable
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),

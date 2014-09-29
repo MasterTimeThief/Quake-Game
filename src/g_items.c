@@ -1041,6 +1041,63 @@ be on an entity that hasn't spawned yet.
 */
 void SpawnItem (edict_t *ent, gitem_t *item)
 {
+	if (deathmatch->value) 
+    { 
+        if (strcmp(ent->classname, "weapon_shotgun") == 0) 
+        { 
+            ent->classname = "ammo_shells"; 
+            item = FindItemByClassname ("ammo_shells"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_supershotgun") == 0) 
+        { 
+            ent->classname = "ammo_shells"; 
+            item = FindItemByClassname ("ammo_shells"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_machinegun") == 0) 
+        { 
+            ent->classname = "ammo_bullets"; 
+            item = FindItemByClassname ("ammo_bullets"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_chaingun") == 0) 
+        { 
+            ent->classname = "ammo_bullets"; 
+            item = FindItemByClassname ("ammo_bullets"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_grenadelauncher") == 0) 
+        { 
+            ent->classname = "ammo_grenades"; 
+            item = FindItemByClassname ("ammo_grenades"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_rocketlauncher") == 0) 
+        { 
+            ent->classname = "ammo_rockets"; 
+            item = FindItemByClassname ("ammo_rockets"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_railgun") == 0) 
+        { 
+            ent->classname = "ammo_slugs"; 
+            item = FindItemByClassname ("ammo_slugs"); 
+        } 
+   
+        if (strcmp(ent->classname, "weapon_hyperblaster") == 0) 
+        { 
+            ent->classname = "ammo_cells"; 
+            item = FindItemByClassname ("ammo_cells"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_bfg") == 0) 
+        { 
+            ent->classname = "ammo_cells"; 
+            item = FindItemByClassname ("ammo_cells"); 
+        } 
+    }
+	
 	PrecacheItem (item);
 
 	if (ent->spawnflags)

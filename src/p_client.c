@@ -483,6 +483,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
+	self->svflags &= ~SVF_NOCLIENT;
+
 	VectorClear (self->avelocity);
 
 	self->takedamage = DAMAGE_YES;
@@ -507,7 +509,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		LookAtKiller (self, inflictor, attacker);
 		self->client->ps.pmove.pm_type = PM_DEAD;
 		ClientObituary (self, inflictor, attacker);
-		TossClientWeapon (self);
 		if (deathmatch->value)
 			Cmd_Help_f (self);		// show scores
 
@@ -587,15 +588,110 @@ but is called after each death and level change in deathmatch
 */
 void InitClientPersistant (gclient_t *client)
 {
-	gitem_t		*item;
+	if (client->resp.classVar == 1) 
+    {
+        //Class 1 (Soldier)
+        gitem_t         *item;
 
-	memset (&client->pers, 0, sizeof(client->pers));
+        memset (&client->pers, 0, sizeof(client->pers));
 
-	item = FindItem("Blaster");
-	client->pers.selected_item = ITEM_INDEX(item);
-	client->pers.inventory[client->pers.selected_item] = 1;
+        item = FindItem("Blaster");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
 
-	client->pers.weapon = item;
+        item = FindItem("Jacket Armor");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 25;
+
+        item = FindItem("Rockets");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 30;
+
+        item = FindItem("Rocket Launcher");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+
+        client->pers.weapon = item;
+    }
+    else if (client->resp.classVar == 2)
+    {
+        //Class 2 (Heavy)
+        gitem_t         *item;
+
+        memset (&client->pers, 0, sizeof(client->pers));
+
+        item = FindItem("Blaster");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+        item = FindItem("Combat Armor");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 50;
+        item = FindItem("Bullets");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 300;
+        item = FindItem("Chaingun");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+
+        client->pers.weapon = item;
+    }
+	else if (client->resp.classVar == 3)
+    {
+        //Class 3 (Sniper)
+        gitem_t         *item;
+
+        memset (&client->pers, 0, sizeof(client->pers));
+
+        item = FindItem("Blaster");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+        item = FindItem("Combat Armor");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 50;
+        item = FindItem("Slugs");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 30;
+        item = FindItem("Railgun");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+
+        client->pers.weapon = item;
+    }
+	else if (client->resp.classVar == 4)
+    {
+        //Class 4 (Mutant)
+        gitem_t         *item;
+
+        memset (&client->pers, 0, sizeof(client->pers));
+
+        item = FindItem("Blaster");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+        item = FindItem("Combat Armor");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 50;
+        item = FindItem("Cells");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 30;
+        item = FindItem("Hyperblaster");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+
+        client->pers.weapon = item;
+    }
+    else 
+    {
+        //Observer mode, doesn't really matter what they have
+        gitem_t         *item;
+
+        memset (&client->pers, 0, sizeof(client->pers));
+    
+        item = FindItem("Combat Armor");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+
+        client->pers.weapon = item;
+    }
 
 	client->pers.health			= 100;
 	client->pers.max_health		= 100;
@@ -1238,6 +1334,41 @@ void PutClientInServer (edict_t *ent)
 	ChangeWeapon (ent);
 }
 
+void EndObserverMode(edict_t* ent) 
+{ 
+    ent->movetype &= ~MOVETYPE_NOCLIP; 
+    ent->solid &= ~SOLID_NOT; 
+    ent->svflags &= ~SVF_NOCLIENT; 
+
+    PutClientInServer (ent);
+
+    if (level.intermissiontime)
+    {
+        MoveClientToIntermission (ent);
+    }
+    else
+    {
+        // send effect
+        gi.WriteByte (svc_muzzleflash);
+        gi.WriteShort (ent-g_edicts);
+        gi.WriteByte (MZ_LOGIN);
+        gi.multicast (ent->s.origin, MULTICAST_PVS);
+    }
+
+    if (ent->client->resp.classVar == 1)
+        gi.bprintf (PRINT_HIGH, "%s is a Soldier.\n", ent->client->pers.netname); 
+
+    else if (ent->client->resp.classVar == 2)
+        gi.bprintf (PRINT_HIGH, "%s is a Heavy.\n", ent->client->pers.netname);
+
+	else if (ent->client->resp.classVar == 3)
+        gi.bprintf (PRINT_HIGH, "%s is a Sniper.\n", ent->client->pers.netname); 
+
+	else if (ent->client->resp.classVar == 4)
+        gi.bprintf (PRINT_HIGH, "%s is the Mutant.\n", ent->client->pers.netname); 
+
+}
+
 /*
 =====================
 ClientBeginDeathmatch
@@ -1255,20 +1386,8 @@ void ClientBeginDeathmatch (edict_t *ent)
 	// locate ent at a spawn point
 	PutClientInServer (ent);
 
-	if (level.intermissiontime)
-	{
-		MoveClientToIntermission (ent);
-	}
-	else
-	{
-		// send effect
-		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_LOGIN);
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
-	}
-
-	gi.bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
+	ent->client->ps.gunindex = 0; 
+    gi.linkentity (ent);
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
@@ -1601,6 +1720,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			client->ps.pmove.pm_type = PM_NORMAL;
 
 		client->ps.pmove.gravity = sv_gravity->value;
+
+		if (ent->client->resp.classVar < 1)
+		{
+			ent->solid = SOLID_NOT;
+			ent->movetype = MOVETYPE_NOCLIP;
+			ent->svflags |= SVF_NOCLIENT;
+		}
+
 		pm.s = client->ps.pmove;
 
 		for (i=0 ; i<3 ; i++)
