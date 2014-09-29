@@ -897,3 +897,98 @@ void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, f
 
 	gi.linkentity (bfg);
 }
+
+/*
+=================
+fire_sniper
+=================
+*/
+void fire_sniper (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+{
+    vec3_t        from;
+    vec3_t        end;
+    trace_t        tr;
+    edict_t        *ignore;
+    int             mask;
+    qboolean    water;
+    int bodypos; 
+    int    mod;
+    int    n;
+
+    VectorMA (start, 8192, aimdir, end);
+    VectorCopy (start, from);
+    ignore = self;
+    water = false;
+
+    mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
+    while (ignore)
+    {
+        tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+
+        if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
+        {
+            mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
+            water = true;
+        }
+        else
+        {
+            if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
+                ignore = tr.ent;
+            else
+                ignore = NULL;
+
+
+//beginning of locational damage
+
+
+       if (tr.ent->client)
+            {
+            if (tr.endpos[2] < (tr.ent->s.origin[2] - 0))
+            {
+                bodypos = 1; // leg shot
+                mod = MOD_SNIPER_LEG;
+                damage = damage * .5;
+            }
+            else if (tr.endpos[2] > ((tr.ent->s.origin[2] + 20)))
+            {
+                bodypos = 2;
+                mod = MOD_SNIPER_HEAD;
+                damage = damage * 2;
+                for (n= 0; n < 5; n++)
+                ThrowGib (tr.ent, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+            }
+            else 
+            {
+                bodypos = 0;
+                mod = MOD_SNIPER_CHEST;
+            }
+
+//end of locational damage
+
+            if ((tr.ent != self) && (tr.ent->takedamage))
+                T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, mod);
+        }
+
+        VectorCopy (tr.endpos, from);
+    }
+    gi.WriteByte (svc_temp_entity);
+    gi.WriteByte (TE_GUNSHOT);
+    gi.WritePosition (tr.endpos);
+    gi.WriteDir (tr.plane.normal);
+    gi.multicast (tr.endpos, MULTICAST_PVS);
+
+    gi.WriteByte (svc_temp_entity);
+    gi.WriteByte (TE_GUNSHOT);
+    gi.WritePosition (tr.endpos);
+    gi.WriteDir (tr.plane.normal);
+    gi.multicast (tr.endpos, MULTICAST_PVS);
+
+    gi.WriteByte (svc_temp_entity);
+    gi.WriteByte (TE_GUNSHOT);
+    gi.WritePosition (tr.endpos);
+    gi.WriteDir (tr.plane.normal);
+    gi.multicast (tr.endpos, MULTICAST_PVS);
+    if (self->client)
+        PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
+    }
+}

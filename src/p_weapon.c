@@ -1411,5 +1411,68 @@ void Weapon_BFG (edict_t *ent)
 	Weapon_Generic (ent, 8, 32, 55, 58, pause_frames, fire_frames, weapon_bfg_fire);
 }
 
+/*
+======================================================================
+
+Sniper Rifle
+
+
+======================================================================
+*/
+void weapon_sniper_fire (edict_t *ent)
+{
+    vec3_t        start;
+    vec3_t        forward, right;
+    vec3_t        offset;
+    int             damage;
+    int             kick;
+    
+    if (deathmatch->value)
+    { 
+        damage = 100;
+        kick = 400;
+    }
+    else
+    {
+        damage = 100;
+        kick = 400;
+    }
+
+    if (is_quad)
+    {
+        damage *= 4;
+        kick *= 4;
+    }
+        
+        AngleVectors (ent->client->v_angle, forward, right, NULL);
+
+        VectorScale (forward, -3, ent->client->kick_origin);
+        ent->client->kick_angles[0] = -3;
+    
+        VectorSet(offset, 0, 0, ent->viewheight-0);
+        P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+        fire_sniper (ent, start, forward, damage, kick);
+    
+    // send muzzle flash
+    gi.WriteByte (svc_muzzleflash);
+    gi.WriteShort (ent-g_edicts);
+    gi.WriteByte (MZ_RAILGUN | is_silenced);
+    gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+    ent->client->ps.gunframe++; 
+
+    PlayerNoise(ent, start, PNOISE_WEAPON);
+
+    if ((! ( (int)dmflags->value & DF_INFINITE_AMMO ) ) && (ent->client->pers.inventory[ent->client->ammo_index] > 0)) 
+        ent->client->pers.inventory[ent->client->ammo_index]--; 
+}
+
+void Weapon_SniperRifle (edict_t *ent)
+{
+    static int    pause_frames[]    = {56, 0};
+    static int    fire_frames[]    = {4, 0};
+
+    Weapon_Generic (ent, 3, 16, 56, 57, pause_frames, fire_frames, weapon_sniper_fire);
+}
 
 //======================================================================

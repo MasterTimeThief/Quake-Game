@@ -651,7 +651,7 @@ void InitClientPersistant (gclient_t *client)
         item = FindItem("Slugs");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 30;
-        item = FindItem("Railgun");
+        item = FindItem("Sniper Rifle");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
 
@@ -664,7 +664,10 @@ void InitClientPersistant (gclient_t *client)
 
         memset (&client->pers, 0, sizeof(client->pers));
 
-        item = FindItem("Blaster");
+        item = FindItem("IR Goggles");
+		client->pers.selected_item = ITEM_INDEX(item);
+		client->pers.inventory[client->pers.selected_item] = 1;
+		item = FindItem("Blaster");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
         item = FindItem("Combat Armor");
@@ -673,7 +676,7 @@ void InitClientPersistant (gclient_t *client)
         item = FindItem("Cells");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 30;
-        item = FindItem("Hyperblaster");
+		item = FindItem("Hyperblaster");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
 
@@ -1790,6 +1793,25 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			VectorCopy (pm.viewangles, client->v_angle);
 			VectorCopy (pm.viewangles, client->ps.viewangles);
+		}
+
+		// PSY: GOGGLES DRAIN
+		if (ent->client->goggles)
+		{
+			if (ent->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] >= 1)
+			{
+				ent->client->goggledrain++;
+				if (ent->client->goggledrain == 10)
+				{
+					ent->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] -= 1;
+					ent->client->goggledrain = 0;
+				}
+			}
+			else
+			{
+				ent->client->ps.rdflags &= ~RDF_IRGOGGLES;
+				ent->client->goggles = 0;
+			}
 		}
 
 		gi.linkentity (ent);

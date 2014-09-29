@@ -16,6 +16,7 @@ void Weapon_Grenade (edict_t *ent);
 void Weapon_GrenadeLauncher (edict_t *ent);
 void Weapon_Railgun (edict_t *ent);
 void Weapon_BFG (edict_t *ent);
+void Weapon_SniperRifle (edict_t *ent);
 
 gitem_armor_t jacketarmor_info	= { 25,  50, .30, .00, ARMOR_JACKET};
 gitem_armor_t combatarmor_info	= { 50, 100, .60, .30, ARMOR_COMBAT};
@@ -1318,6 +1319,31 @@ gitem_t	itemlist[] =
 /* precache */ "misc/power2.wav misc/power1.wav"
 	},
 
+/* item_irgoggles - added by nobody */
+    {
+        "item_irgoggles",
+        Pickup_Powerup,
+        Use_IRGoggles,
+        NULL,
+        NULL,
+        "items/pkup.wav",
+        "models/ammo/nuke/tris.md2", EF_ROTATE,
+        NULL,
+        "k_comhead",
+        "IR Goggles",
+        2,
+        60,
+        NULL,
+        IT_POWERUP,
+        0,
+        NULL,
+        0,
+        ""
+    },
+
+
+
+
 
 	//
 	// WEAPONS 
@@ -1576,6 +1602,30 @@ always owned, never in the world
 		0,
 /* precache */ "sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav weapons/bfg_hum.wav"
 	},
+
+/*QUAKED weapon_sniper (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+    {
+        "weapon_sniper",//weapon function 
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_SniperRifle,//corresponds with the top of g_items.c
+        "misc/w_pkup.wav",
+        "models/weapons/g_rail/tris.md2", EF_ROTATE,//rotating model
+        "models/weapons/v_rail/tris.md2",//model as seen in your hand
+/* icon */        "w_railgun",
+/* pickup */    "Sniper Rifle",
+        0,
+        1,//amount of ammo
+        "Slugs",//type of ammo
+        IT_WEAPON|IT_STAY_COOP,
+
+        WEAP_RAILGUN,//new line in 3.20
+        NULL,
+        0,
+/* precache */ "weapons/rg_hum.wav"
+    },
 
 	//
 	// AMMO ITEMS
@@ -2251,4 +2301,23 @@ void SetItemNames (void)
 	body_armor_index   = ITEM_INDEX(FindItem("Body Armor"));
 	power_screen_index = ITEM_INDEX(FindItem("Power Screen"));
 	power_shield_index = ITEM_INDEX(FindItem("Power Shield"));
+}
+
+/*
+=================
+Use_IRGoggles
+=================
+*/
+void Use_IRGoggles (edict_t *ent, gitem_t *item)
+{
+    if (ent->client->goggles) // we're on
+    {
+        ent->client->goggles = 0;
+        ent->client->ps.rdflags &= ~RDF_IRGOGGLES;
+    }
+    else // we're off
+    {
+        ent->client->goggles = 1;
+        ent->client->ps.rdflags |= RDF_IRGOGGLES;
+    }
 }

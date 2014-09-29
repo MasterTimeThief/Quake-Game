@@ -734,6 +734,9 @@ void G_SetClientEffects (edict_t *ent)
 	if (ent->health <= 0 || level.intermissiontime)
 		return;
 
+	if (!(ent->s.renderfx & RF_IR_VISIBLE))
+       ent->s.renderfx |= RF_IR_VISIBLE;
+
 	if (ent->powerarmor_time > level.time)
 	{
 		pa_type = PowerArmorType (ent);
