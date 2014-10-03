@@ -319,6 +319,8 @@ typedef struct
 	int			body_que;			// dead bodies
 
 	int			power_cubes;		// ugly necessity for coop
+	qboolean	prepTimerOver;
+	int			prepTimer;
 } level_locals_t;
 
 
@@ -949,6 +951,11 @@ struct gclient_s
 	qboolean	update_chase;		// need to update chase info?
 	int			goggles;
 	int			goggledrain;
+	float		prepTimer;
+	float		round1Timer;
+	float		round2Timer;
+	float		round3Timer;
+	int			thinkdelay;
 };
 
 

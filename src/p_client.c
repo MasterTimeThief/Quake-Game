@@ -1185,6 +1185,12 @@ void PutClientInServer (edict_t *ent)
 	client_persistant_t	saved;
 	client_respawn_t	resp;
 
+	//Timer Resets
+	ent->client->prepTimer = -1;
+	ent->client->round1Timer = -1;
+	ent->client->round2Timer = -1;
+	ent->client->round3Timer = -1;
+
 	// find a spawn point
 	// do it before setting health back up, so farthest
 	// ranging doesn't count this client
@@ -1814,6 +1820,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			}
 		}
 
+		if (ent->client->resp.classVar == 1) 
+		{
+
+		}
+
 		gi.linkentity (ent);
 
 		if (ent->movetype != MOVETYPE_NOCLIP)
@@ -1881,6 +1892,18 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (other->inuse && other->client->chase_target == ent)
 			UpdateChaseCam(other);
 	}
+
+	// Position tracker code
+	/*if(client->thinkdelay <= 0)
+	{
+		client->thinkdelay = 100;
+		//think slowly
+		gi.centerprintf(ent, "position: (%0.4f,%0.4f,%0.4f)", ent->s.origin[0], ent->s.origin[1], ent->s.origin[2]);
+	}
+	else
+	{
+		client->thinkdelay--;
+	}*/
 }
 
 

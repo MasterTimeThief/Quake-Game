@@ -965,26 +965,39 @@ void ClientCommand (edict_t *ent)
 		Cmd_PutAway_f (ent);
 	else if (Q_stricmp (cmd, "wave") == 0)
 		Cmd_Wave_f (ent);
+
 	else if (Q_stricmp (cmd, "class1") == 0)
-    {
-            ent->client->resp.classVar = 1;
-            EndObserverMode(ent);
-    }
-    else if (Q_stricmp (cmd, "class2") == 0) 
-    {
-            ent->client->resp.classVar = 2;
-            EndObserverMode(ent);
-    }
+	{
+		if (level.prepTimerOver == false)
+		{
+			ent->client->resp.classVar = 1;
+			EndObserverMode(ent);
+		}
+	}
+	else if (Q_stricmp (cmd, "class2") == 0)
+	{
+		if (level.prepTimerOver == false)
+		{
+			ent->client->resp.classVar = 2;
+			EndObserverMode(ent);
+		}
+	}
 	else if (Q_stricmp (cmd, "class3") == 0)
-    {
-            ent->client->resp.classVar = 3;
-            EndObserverMode(ent);
-    }
+	{
+		if (level.prepTimerOver == false)
+		{
+			ent->client->resp.classVar = 3;
+			EndObserverMode(ent);
+		}
+	}
 	else if (Q_stricmp (cmd, "class4") == 0)
-    {
-            ent->client->resp.classVar = 4;
-            EndObserverMode(ent);
-    }
+	{
+		if (level.prepTimerOver == false)
+		{
+			ent->client->resp.classVar = 4;
+			EndObserverMode(ent);
+		}
+	}
     else if (Q_stricmp (cmd, "class") == 0) 
     {
         if (ent->client->resp.classVar == 1)

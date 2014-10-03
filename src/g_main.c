@@ -287,6 +287,10 @@ void CheckDMRules (void)
 	int			i;
 	gclient_t	*cl;
 
+
+	int			timerValue;
+	timerValue = 100;
+
 	if (level.intermissiontime)
 		return;
 
@@ -300,6 +304,21 @@ void CheckDMRules (void)
 			gi.bprintf (PRINT_HIGH, "Timelimit hit.\n");
 			EndDMLevel ();
 			return;
+		}
+	}
+
+	if (level.prepTimerOver != true)
+	{
+		if (level.prepTimer >= timerValue)
+		{
+			level.prepTimerOver = true;
+			gi.bprintf(PRINT_HIGH, "\n\n\n\n\n----OVER----\n");
+			level.prepTimer = 0;
+		}
+		else if ((level.prepTimer < timerValue))
+		{
+			level.prepTimer++;
+			gi.bprintf(PRINT_HIGH, "\n\n\n\n\nTime remaining: %i\n", timerValue - level.prepTimer);
 		}
 	}
 
