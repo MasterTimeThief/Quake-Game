@@ -971,7 +971,7 @@ void ClientCommand (edict_t *ent)
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 1;
-			EndObserverMode(ent);
+			//EndObserverMode(ent);
 		}
 	}
 	else if (Q_stricmp (cmd, "class2") == 0)
@@ -979,7 +979,7 @@ void ClientCommand (edict_t *ent)
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 2;
-			EndObserverMode(ent);
+			//EndObserverMode(ent);
 		}
 	}
 	else if (Q_stricmp (cmd, "class3") == 0)
@@ -987,7 +987,7 @@ void ClientCommand (edict_t *ent)
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 3;
-			EndObserverMode(ent);
+			//EndObserverMode(ent);
 		}
 	}
 	else if (Q_stricmp (cmd, "class4") == 0)
@@ -995,7 +995,7 @@ void ClientCommand (edict_t *ent)
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 4;
-			EndObserverMode(ent);
+			//EndObserverMode(ent);
 		}
 	}
     else if (Q_stricmp (cmd, "class") == 0) 

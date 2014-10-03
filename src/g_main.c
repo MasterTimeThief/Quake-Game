@@ -309,13 +309,13 @@ void CheckDMRules (void)
 
 	if (level.prepTimerOver != true)
 	{
-		if (level.prepTimer >= timerValue)
+		if (level.prepTimer >= timerValue) //when timer runs out
 		{
 			level.prepTimerOver = true;
-			gi.bprintf(PRINT_HIGH, "\n\n\n\n\n----OVER----\n");
+			gi.bprintf(PRINT_HIGH, "\n\n\n\n\n----BEGIN----\n");
 			level.prepTimer = 0;
 		}
-		else if ((level.prepTimer < timerValue))
+		else if (level.prepTimer < timerValue) //while timer has not run out yet
 		{
 			level.prepTimer++;
 			gi.bprintf(PRINT_HIGH, "\n\n\n\n\nTime remaining: %i\n", timerValue - level.prepTimer);

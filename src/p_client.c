@@ -612,6 +612,11 @@ void InitClientPersistant (gclient_t *client)
         client->pers.inventory[client->pers.selected_item] = 1;
 
         client->pers.weapon = item;
+
+		client->pers.health			= 100;
+		client->pers.max_health		= 100;
+
+		client->resp.classVar = 5;
     }
     else if (client->resp.classVar == 2)
     {
@@ -634,6 +639,11 @@ void InitClientPersistant (gclient_t *client)
         client->pers.inventory[client->pers.selected_item] = 1;
 
         client->pers.weapon = item;
+
+		client->pers.health			= 100;
+		client->pers.max_health		= 100;
+
+		client->resp.classVar = 5;
     }
 	else if (client->resp.classVar == 3)
     {
@@ -656,6 +666,11 @@ void InitClientPersistant (gclient_t *client)
         client->pers.inventory[client->pers.selected_item] = 1;
 
         client->pers.weapon = item;
+
+		client->pers.health			= 100;
+		client->pers.max_health		= 100;
+
+		client->resp.classVar = 5;
     }
 	else if (client->resp.classVar == 4)
     {
@@ -681,8 +696,13 @@ void InitClientPersistant (gclient_t *client)
         client->pers.inventory[client->pers.selected_item] = 1;
 
         client->pers.weapon = item;
+
+		client->pers.health			= 10000;
+		client->pers.max_health		= 10000;
+
+		client->resp.classVar = 5;
     }
-    else 
+    else if (client->resp.classVar < 1 || client->resp.classVar == 5)
     {
         //Observer mode, doesn't really matter what they have
         gitem_t         *item;
@@ -694,10 +714,14 @@ void InitClientPersistant (gclient_t *client)
         client->pers.inventory[client->pers.selected_item] = 1;
 
         client->pers.weapon = item;
+
+		client->pers.health			= 100;
+		client->pers.max_health		= 100;
+
+		client->resp.classVar = 0;
     }
 
-	client->pers.health			= 100;
-	client->pers.max_health		= 100;
+	//client->resp.classVar = 0;
 
 	client->pers.max_bullets	= 200;
 	client->pers.max_shells		= 100;
@@ -1184,12 +1208,7 @@ void PutClientInServer (edict_t *ent)
 	int		i;
 	client_persistant_t	saved;
 	client_respawn_t	resp;
-
-	//Timer Resets
-	ent->client->prepTimer = -1;
-	ent->client->round1Timer = -1;
-	ent->client->round2Timer = -1;
-	ent->client->round3Timer = -1;
+	int					classSave;
 
 	// find a spawn point
 	// do it before setting health back up, so farthest
@@ -1234,13 +1253,15 @@ void PutClientInServer (edict_t *ent)
 		memset (&resp, 0, sizeof(resp));
 	}
 
-	// clear everything but the persistant data
+	// clear everything but the persistant data and classVar
+	classSave = client->resp.classVar;
 	saved = client->pers;
 	memset (client, 0, sizeof(*client));
 	client->pers = saved;
 	if (client->pers.health <= 0)
 		InitClientPersistant(client);
 	client->resp = resp;
+	client->resp.classVar = classSave;
 
 	// copy some data from the client to the entity
 	FetchClientEntData (ent);
@@ -1692,6 +1713,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	edict_t	*other;
 	int		i, j;
 	pmove_t	pm;
+	int			numPlayer;
+	int			numObserve;
 
 	level.current_entity = ent;
 	client = ent->client;
@@ -1802,27 +1825,22 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 
 		// PSY: GOGGLES DRAIN
-		if (ent->client->goggles)
+		if (client->goggles)
 		{
-			if (ent->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] >= 1)
+			if (client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] >= 1)
 			{
-				ent->client->goggledrain++;
-				if (ent->client->goggledrain == 10)
+				client->goggledrain++;
+				if (client->goggledrain == 10)
 				{
-					ent->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] -= 1;
-					ent->client->goggledrain = 0;
+					client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] -= 1;
+					client->goggledrain = 0;
 				}
 			}
 			else
 			{
-				ent->client->ps.rdflags &= ~RDF_IRGOGGLES;
-				ent->client->goggles = 0;
+				client->ps.rdflags &= ~RDF_IRGOGGLES;
+				client->goggles = 0;
 			}
-		}
-
-		if (ent->client->resp.classVar == 1) 
-		{
-
 		}
 
 		gi.linkentity (ent);
@@ -1893,6 +1911,47 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			UpdateChaseCam(other);
 	}
 
+	// check how many remaining players are in the game
+	for (i = 1, numPlayer = 0, numObserve = 0; i <= maxclients->value; i++)
+	{
+		if (g_edicts[i].inuse)
+		{
+			numPlayer++;
+			if (g_edicts[i].client->resp.classVar == 0)
+				numObserve++;
+		}
+	}
+
+	//if monster is left alive, restart prepTimerOver
+	/*if (client->resp.classVar == 4 && (numPlayer - numObserve) == 1)
+	{
+		gi.centerprintf(ent, "Mutation Victorious!");
+		level.prepTimerOver = false;
+	}
+	
+	//restart level when someone wins
+	if (level.prepTimerOver == false && (level.prepTimer == 0))
+		EndObserverMode(ent);*/
+
+	//spawn people in after countdown if they chose a class
+	if (level.prepTimerOver == true && client->resp.classVar != 0 && client->resp.classVar != 5)
+	{
+		EndObserverMode(ent);
+	}
+
+	if (level.prepTimerOver == false)
+	{
+		if (client->resp.classVar == 1)
+			gi.centerprintf(ent, "CLASS: Soldier");
+		if (client->resp.classVar == 2)
+			gi.centerprintf(ent, "CLASS: Heavy  ");
+		if (client->resp.classVar == 3)
+			gi.centerprintf(ent, "CLASS: Sniper ");
+		if (client->resp.classVar == 4)
+			gi.centerprintf(ent, "CLASS: Mutant ");
+	}
+	
+	
 	// Position tracker code
 	/*if(client->thinkdelay <= 0)
 	{
