@@ -966,27 +966,54 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp (cmd, "wave") == 0)
 		Cmd_Wave_f (ent);
 
-	else if (Q_stricmp (cmd, "class1") == 0)
+
+	else if (Q_stricmp (cmd, "zoom") == 0)
+    {
+		int zoomtype=atoi(gi.argv(1));
+		
+		if (ent->client->resp.sniperUse == true)
+		{
+			if (zoomtype==0)
+			{
+				ent->client->ps.fov = 90;
+			}
+			else if (zoomtype==1)
+			{
+				if (ent->client->ps.fov == 90) 
+					ent->client->ps.fov = 40;
+				else if (ent->client->ps.fov == 40) 
+					ent->client->ps.fov = 20;
+				else if (ent->client->ps.fov == 20) 
+					ent->client->ps.fov = 10;
+				else 
+					ent->client->ps.fov = 90;
+			}
+		}
+	}
+	else if (Q_stricmp (cmd, "class1") == 0) // Soldier
 	{
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 1;
+			ent->client->resp.sniperUse = false;
 			//EndObserverMode(ent);
 		}
 	}
-	else if (Q_stricmp (cmd, "class2") == 0)
+	else if (Q_stricmp (cmd, "class2") == 0) // Heavy
 	{
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 2;
+			ent->client->resp.sniperUse = false;
 			//EndObserverMode(ent);
 		}
 	}
-	else if (Q_stricmp (cmd, "class3") == 0)
+	else if (Q_stricmp (cmd, "class3") == 0) // Sniper
 	{
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 3;
+			ent->client->resp.sniperUse = true;
 			//EndObserverMode(ent);
 		}
 	}
@@ -995,6 +1022,7 @@ void ClientCommand (edict_t *ent)
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 4;
+			ent->client->resp.sniperUse = false;
 			//EndObserverMode(ent);
 		}
 	}

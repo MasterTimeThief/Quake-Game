@@ -1753,6 +1753,48 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		client->ps.pmove.gravity = sv_gravity->value;
 
+		//passive cloaking start
+
+		if (client->resp.sniperUse == true)
+		{
+			if ((ucmd->forwardmove == 0) && (ucmd->sidemove == 0) && (ucmd->upmove == 0))
+			{
+				ent->client->passiveoff = 0;
+
+				ent->client->passiveon ++;
+				if (ent->client->passiveon == 60) //1 second = 30 whatever this is
+				{
+					ent->svflags |= SVF_NOCLIENT;
+					gi.centerprintf (ent, "You Are Cloaked!\n");
+					ent->client->passiveon = 301;
+				}
+			}
+
+			if ((ucmd->forwardmove != 0) || (ucmd->sidemove != 0) || (ucmd->upmove != 0))
+			{
+				ent->client->passiveon = 0;
+			}
+			//for passive cloaking off
+			if (ent->svflags & SVF_NOCLIENT)
+			{
+				if ((ucmd->forwardmove != 0) || (ucmd->sidemove != 0) || (ucmd->upmove != 0))
+				{
+
+					ent->client->passiveon = 0;
+					ent->client->passiveoff ++;
+					if (ent->client->passiveoff == 1)
+					{
+						ent->svflags &= ~SVF_NOCLIENT;
+						gi.centerprintf (ent, "You Are Visible!\n");
+						ent->client->passiveon = 0;
+						ent->client->passiveoff = 2;
+					}
+				}
+			}
+		}
+		
+		//passive cloaking end
+
 		if (ent->client->resp.classVar < 1)
 		{
 			ent->solid = SOLID_NOT;

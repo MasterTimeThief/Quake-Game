@@ -864,7 +864,7 @@ typedef struct
 
 	qboolean	spectator;			// client is a spectator
 	int			classVar;				//added for the class variable
-	qboolean	oneLife;
+	qboolean	sniperUse;
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),
@@ -954,6 +954,9 @@ struct gclient_s
 	int			goggles;
 	int			goggledrain;
 	int			thinkdelay;
+
+	int			passiveon;
+	int			passiveoff;
 };
 
 
