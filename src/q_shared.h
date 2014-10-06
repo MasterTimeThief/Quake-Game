@@ -40,7 +40,6 @@ typedef enum {false, true}	qboolean;
 #define NULL ((void *)0)
 #endif
 
-
 // angle indexes
 #define	PITCH				0		// up / down
 #define	YAW					1		// left / right

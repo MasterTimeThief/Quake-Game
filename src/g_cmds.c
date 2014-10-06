@@ -1004,7 +1004,7 @@ void ClientCommand (edict_t *ent)
 		Cmd_PutAway_f (ent);
 	else if (Q_stricmp (cmd, "wave") == 0)
 		Cmd_Wave_f (ent);
-
+	
 	else if (Q_stricmp (cmd, "grenade") == 0)
 	{
 		if (ent->client->resp.mutantUse == true)

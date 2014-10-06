@@ -573,6 +573,15 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	self->deadflag = DEAD_DEAD;
 
+	if (self->client->resp.mutantUse == true)
+	{
+		level.prepTimerOver = false;
+		self->client->resp.mutantUse = false;
+	}
+
+	if (self->client->resp.sniperUse == true)
+		self->client->resp.sniperUse = false;
+
 	gi.linkentity (self);
 }
 
@@ -1959,13 +1968,13 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (g_edicts[i].inuse)
 		{
 			numPlayer++;
-			if (g_edicts[i].client->resp.classVar == 0)
+			if (g_edicts[i].client->resp.classVar < 1)
 				numObserve++;
 		}
 	}
 
 	//if monster is left alive, restart prepTimerOver
-	/*if (client->resp.classVar == 4 && (numPlayer - numObserve) == 1)
+	if (client->resp.classVar == 4 && (numPlayer - numObserve) == 1)
 	{
 		gi.centerprintf(ent, "Mutation Victorious!");
 		level.prepTimerOver = false;
@@ -1973,7 +1982,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	
 	//restart level when someone wins
 	if (level.prepTimerOver == false && (level.prepTimer == 0))
-		EndObserverMode(ent);*/
+		EndObserverMode(ent);
 
 	//spawn people in after countdown if they chose a class
 	if (level.prepTimerOver == true && client->resp.classVar != 0 && client->resp.classVar != 5)
