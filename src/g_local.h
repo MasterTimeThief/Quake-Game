@@ -958,6 +958,12 @@ struct gclient_s
 
 	int			passiveon;
 	int			passiveoff;
+
+	//Grapple Variables
+	edict_t		*hook;        
+	edict_t		*hook_touch;  
+	qboolean	on_hook;      
+	int			hook_frame;
 };
 
 

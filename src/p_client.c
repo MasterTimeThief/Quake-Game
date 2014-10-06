@@ -1,5 +1,6 @@
 #include "g_local.h"
 #include "m_player.h"
+#include "grapple.h"
 
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 
@@ -482,6 +483,9 @@ player_die
 void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
+
+	if (self->client->hook)
+		Release_Grapple(self->client->hook);
 
 	self->svflags &= ~SVF_NOCLIENT;
 
@@ -1738,6 +1742,16 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		return;
 	}
 
+	if (client->on_hook == true)
+	{
+		Pull_Grapple(ent);
+		client->ps.pmove.gravity = 0;
+	}
+	else
+	{
+		client->ps.pmove.gravity = sv_gravity->value;
+	}
+
 	pm_passent = ent;
 
 	if (ent->client->chase_target) {
@@ -1760,11 +1774,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		else
 			client->ps.pmove.pm_type = PM_NORMAL;
 
-		client->ps.pmove.gravity = sv_gravity->value;
+		//client->ps.pmove.gravity = sv_gravity->value;
 
 		//passive cloaking start
 
-		if (client->resp.sniperUse == true)
+		if (client->resp.sniperUse == true && level.prepTimerOver == true)
 		{
 			if ((ucmd->forwardmove == 0) && (ucmd->sidemove == 0) && (ucmd->upmove == 0))
 			{
@@ -1962,6 +1976,17 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			UpdateChaseCam(other);
 	}
 
+	// Check to see if player pressing the "use" key
+    if (ent->client->buttons & BUTTON_USE && !ent->deadflag && client->hook_frame <= level.framenum)
+    {     
+		if (client->resp.mutantUse == true && level.prepTimerOver == true)
+			Throw_Grapple (ent);     
+    }
+    if    (Ended_Grappling (client) && !ent->deadflag && client->hook)
+    {
+        Release_Grapple (client->hook);
+	}
+
 	// check how many remaining players are in the game
 	for (i = 1, numPlayer = 0, numObserve = 0; i <= maxclients->value; i++)
 	{
@@ -1974,11 +1999,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	//if monster is left alive, restart prepTimerOver
-	if (client->resp.classVar == 4 && (numPlayer - numObserve) == 1)
+	/*if (client->resp.classVar == 4 && (numPlayer - numObserve) == 1)
 	{
 		gi.centerprintf(ent, "Mutation Victorious!");
 		level.prepTimerOver = false;
-	}
+	}*/
 	
 	//restart level when someone wins
 	if (level.prepTimerOver == false && (level.prepTimer == 0))
