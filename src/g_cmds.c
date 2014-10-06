@@ -2,6 +2,18 @@
 #include "m_player.h"
 
 
+static void C_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
+{
+	vec3_t	_distance;
+
+	VectorCopy (distance, _distance);
+	if (client->pers.hand == LEFT_HANDED)
+		_distance[1] *= -1;
+	else if (client->pers.hand == CENTER_HANDED)
+		_distance[1] = 0;
+	G_ProjectSource (point, _distance, forward, right, result);
+}
+
 char *ClientTeam (edict_t *ent)
 {
 	char		*p;
@@ -880,6 +892,33 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
+void CMD_Print_Position(edict_t *ent)
+{
+	if (!ent)return;
+	gi.cprintf(ent,PRINT_HIGH,"%s position: (%0.4f,%0.4f,%0.4f)\n",ent->classname,ent->s.origin[0],ent->s.origin[1],ent->s.origin[02]);
+}
+
+void dropGrenade (edict_t *ent)
+{
+	vec3_t	offset;
+	vec3_t	forward, right;
+	vec3_t	start;
+	int		damage = 125;
+	float	timer;
+	int		speed;
+	float	radius;
+
+	radius = damage+40;
+
+	VectorSet(offset, 8, 8, ent->viewheight-8);
+	AngleVectors(ent->client->v_angle, forward, right, NULL);
+	C_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+	timer = ent->client->grenade_time - level.time;
+	speed = 400 + (3 - timer) * ((800 - 400) / 3);
+	fire_grenade2 (ent, start, forward, damage, speed, timer, radius, true);
+}
+
 /*
 =================
 ClientCommand
@@ -966,7 +1005,11 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp (cmd, "wave") == 0)
 		Cmd_Wave_f (ent);
 
-
+	else if (Q_stricmp (cmd, "grenade") == 0)
+	{
+		if (ent->client->resp.mutantUse == true)
+			dropGrenade(ent);
+	}
 	else if (Q_stricmp (cmd, "zoom") == 0)
     {
 		int zoomtype=atoi(gi.argv(1));
@@ -996,7 +1039,7 @@ void ClientCommand (edict_t *ent)
 		{
 			ent->client->resp.classVar = 1;
 			ent->client->resp.sniperUse = false;
-			//EndObserverMode(ent);
+			ent->client->resp.mutantUse = false;
 		}
 	}
 	else if (Q_stricmp (cmd, "class2") == 0) // Heavy
@@ -1005,7 +1048,7 @@ void ClientCommand (edict_t *ent)
 		{
 			ent->client->resp.classVar = 2;
 			ent->client->resp.sniperUse = false;
-			//EndObserverMode(ent);
+			ent->client->resp.mutantUse = false;
 		}
 	}
 	else if (Q_stricmp (cmd, "class3") == 0) // Sniper
@@ -1014,7 +1057,7 @@ void ClientCommand (edict_t *ent)
 		{
 			ent->client->resp.classVar = 3;
 			ent->client->resp.sniperUse = true;
-			//EndObserverMode(ent);
+			ent->client->resp.mutantUse = false;
 		}
 	}
 	else if (Q_stricmp (cmd, "class4") == 0)
@@ -1023,7 +1066,7 @@ void ClientCommand (edict_t *ent)
 		{
 			ent->client->resp.classVar = 4;
 			ent->client->resp.sniperUse = false;
-			//EndObserverMode(ent);
+			ent->client->resp.mutantUse = true;
 		}
 	}
     else if (Q_stricmp (cmd, "class") == 0) 

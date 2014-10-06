@@ -865,6 +865,7 @@ typedef struct
 	qboolean	spectator;			// client is a spectator
 	int			classVar;				//added for the class variable
 	qboolean	sniperUse;
+	qboolean	mutantUse;
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),
