@@ -1033,40 +1033,53 @@ void ClientCommand (edict_t *ent)
 			}
 		}
 	}
-	else if (Q_stricmp (cmd, "class1") == 0) // Soldier
+	else if (Q_stricmp (cmd, "soldier") == 0) // Soldier
 	{
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 1;
+			ent->client->resp.soldierUse = true;
+			ent->client->resp.heavyUse = false;
 			ent->client->resp.sniperUse = false;
 			ent->client->resp.mutantUse = false;
+			gi.centerprintf(ent, "CLASS: Soldier");
 		}
 	}
-	else if (Q_stricmp (cmd, "class2") == 0) // Heavy
+	else if (Q_stricmp (cmd, "heavy") == 0) // Heavy
 	{
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 2;
+			ent->client->resp.soldierUse = false;
+			ent->client->resp.heavyUse = true;
 			ent->client->resp.sniperUse = false;
 			ent->client->resp.mutantUse = false;
+			gi.centerprintf(ent, "CLASS: Heavy");
 		}
 	}
-	else if (Q_stricmp (cmd, "class3") == 0) // Sniper
+	else if (Q_stricmp (cmd, "sniper") == 0) // Sniper
 	{
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 3;
+			ent->client->resp.soldierUse = false;
+			ent->client->resp.heavyUse = false;
 			ent->client->resp.sniperUse = true;
 			ent->client->resp.mutantUse = false;
+			gi.centerprintf(ent, "CLASS: Sniper");
 		}
 	}
-	else if (Q_stricmp (cmd, "class4") == 0)
+	else if (Q_stricmp (cmd, "4") == 0)
 	{
 		if (level.prepTimerOver == false)
 		{
 			ent->client->resp.classVar = 4;
+			ent->client->resp.soldierUse = false;
+			ent->client->resp.heavyUse = false;
 			ent->client->resp.sniperUse = false;
 			ent->client->resp.mutantUse = true;
+			ent->client->resp.levelMutant = 1;
+			gi.centerprintf(ent, "WARNING: Mutant");
 		}
 	}
     else if (Q_stricmp (cmd, "class") == 0) 

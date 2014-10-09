@@ -519,6 +519,7 @@ extern	cvar_t	*filterban;
 
 extern	cvar_t	*sv_gravity;
 extern	cvar_t	*sv_maxvelocity;
+extern	cvar_t	*sv_mutantplayer; //<=== NEW VAR HERE
 
 extern	cvar_t	*gun_x, *gun_y, *gun_z;
 extern	cvar_t	*sv_rollspeed;
@@ -864,8 +865,11 @@ typedef struct
 
 	qboolean	spectator;			// client is a spectator
 	int			classVar;				//added for the class variable
+	qboolean	soldierUse;
+	qboolean	heavyUse;
 	qboolean	sniperUse;
 	qboolean	mutantUse;
+	int			levelMutant;
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),
@@ -964,6 +968,12 @@ struct gclient_s
 	edict_t		*hook_touch;  
 	qboolean	on_hook;      
 	int			hook_frame;
+
+	int			poisonLevel;	//how much poison in system
+	int			poisonDamage;    //how much damage per poison think
+	edict_t     *poisonGiver;	// the last person to inflict poison
+	int			throttle;
+
 };
 
 

@@ -18,6 +18,196 @@ void SP_misc_teleporter_dest (edict_t *ent);
 // we use carnal knowledge of the maps to fix the coop spot targetnames to match
 // that of the nearest named single player spot
 
+
+
+
+//======================================================
+// True if Ent is valid, has client, and edict_t inuse.
+//======================================================
+qboolean G_EntExists(edict_t *ent) 
+{
+	if ((ent) && (ent->client) && (ent->inuse))
+	{
+		return true;
+	}
+	
+}
+
+//======================================================
+// True if ent is not DEAD or DEAD or DEAD (and BURIED!)
+//======================================================
+qboolean G_ClientNotDead(edict_t *ent) 
+{
+	qboolean buried=true;
+	qboolean b1=ent->client->ps.pmove.pm_type!=PM_DEAD;
+	qboolean b2=ent->deadflag != DEAD_DEAD;
+	qboolean b3=ent->health > 0;
+
+	return (b3||b2||b1)&&(buried);
+}
+
+//======================================================
+// True if ent is not DEAD and not just did a Respawn.
+//======================================================
+qboolean G_ClientInGame(edict_t *ent) 
+{
+	if (!G_EntExists(ent)) 
+		return false;
+	if (!G_ClientNotDead(ent)) 
+		return false;
+	return (ent->client->respawn_time + 5.0 < level.time);
+}
+
+//=====================================================
+//=========== FLAGGING BEST PLAYER ROUTINES ===========
+//=====================================================
+
+//=========================================================
+// Returns Player with Highest Score.
+//=========================================================
+edict_t *mutantEnt(void) 
+{
+	edict_t *mutantPlayer=NULL;
+	int i;
+	edict_t *ent;
+
+	// Search thru all clients
+	for(i=0;i < game.maxclients; i++) 
+	{
+		ent=g_edicts+i+1;
+		if (!G_EntExists(ent)) 
+			continue;
+		if (ent->client->resp.mutantUse == true) 
+		{
+			//gi.bprintf(PRINT_HIGH, "Found Particle Person");
+			mutantPlayer=ent; // Found one!
+		}
+	} // end for
+	
+	return mutantPlayer;
+}
+
+//======================================================
+// Ghost think routine. 
+//======================================================
+void Ghost_Think(edict_t *Ghost) 
+{
+	vec3_t start={0,0,0};
+	vec3_t up;
+	edict_t *fPlayer=NULL;
+
+
+	gi.bprintf(PRINT_HIGH, "Ghost Think\n");
+	// Unlink Ghost if intermission..
+	if (level.intermissiontime >= level.time) 
+	{
+		gi.unlinkentity(Ghost);
+		return; 
+	}
+
+	// Check Scoreboard every 1 sec.
+	if (Ghost->delay <= level.time) 
+	{
+		gi.bprintf(PRINT_HIGH, "Search Mutant\n");
+		fPlayer=mutantEnt();
+		Ghost->delay =level.time + 0.1; 
+	}
+	gi.bprintf(PRINT_HIGH, "End Search\n");
+	// Move Ghost above fPlayer.
+	if ((fPlayer!=NULL)) 
+	{
+		if (G_ClientInGame(fPlayer))
+		{
+			gi.bprintf(PRINT_HIGH, "Move It\n");
+			Ghost->svflags &= ~SVF_NOCLIENT; // Turn ON Ghost
+			AngleVectors(fPlayer->s.angles, NULL, NULL, up);
+			VectorMA(fPlayer->s.origin, 60, up, start);
+			VectorCopy(start, Ghost->s.origin); // Move Ghost
+			gi.linkentity(Ghost); 
+		}
+	} // Must update Ghost!
+	else
+		// No fPlayer to follow so..
+		// turn OFF Ghost temporarily
+		gi.bprintf(PRINT_HIGH, "Null?\n");
+		Ghost->nextthink = level.time + 0.1; // Every frame..
+}
+
+//======================================================
+// Create Ghost Entity
+//======================================================
+void Create_Ghost(void) 
+{
+	edict_t *Ghost;
+
+	Ghost=G_Spawn();
+	Ghost->owner=NULL;
+	Ghost->s.effects=EF_TELEPORTER; // Particle effect.
+	Ghost->model="";
+	Ghost->takedamage=DAMAGE_NO;
+	Ghost->movetype=MOVETYPE_NONE;
+	Ghost->solid=SOLID_NOT;
+	Ghost->s.modelindex = 0;
+	Ghost->s.modelindex2 = 0;
+	VectorClear(Ghost->mins);
+	VectorClear(Ghost->maxs);
+	Ghost->delay=0;
+	Ghost->think=Ghost_Think;
+	Ghost->nextthink = 1.0; // Start in 1 second.
+	gi.linkentity(Ghost);
+}
+
+/*void mutantChoice(void) 
+{
+	int i, chosen, players = 0;
+	edict_t *ent;
+
+	// Search thru all clients
+	for(i=0;i < game.maxclients; i++) 
+	{
+		ent=g_edicts+i+1;
+		if (!G_EntExists(ent)) 
+			continue;
+		players++;
+	}
+
+	chosen = (rand()%(players - 1));//rand
+	gi.bprintf(PRINT_HIGH, "player chosen: %i", chosen);
+	ent=g_edicts+chosen+1;
+	ent->client->resp.classVar = 5;
+	ent->client->resp.soldierUse = false;
+	ent->client->resp.heavyUse = false;
+	ent->client->resp.sniperUse = false;
+	ent->client->resp.mutantUse = true;
+	ent->client->resp.levelMutant = 1;
+}
+
+qboolean mutantExistance(void) 
+{
+	int			i;
+	edict_t		*ent;
+	qboolean	check = false;
+
+	// Search thru all clients
+	for(i=0;i < game.maxclients; i++) 
+	{
+		ent=g_edicts+i+1;
+		if (!G_EntExists(ent)) 
+			continue;
+		if (ent->client->resp.mutantUse == true)
+			gi.bprintf(PRINT_HIGH, "Mutant exists\n");
+			check = true;
+	}
+	gi.bprintf(PRINT_HIGH, "Mutant absent\n");
+
+	return check;
+}
+
+int playerCount (void)
+{
+
+}*/
+
 static void SP_FixCoopSpots (edict_t *self)
 {
 	edict_t	*spot;
@@ -581,8 +771,13 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	{
 		level.prepTimerOver = false;
 		self->client->resp.mutantUse = false;
+		self->client->resp.levelMutant = 0;
 	}
 
+	if (self->client->resp.soldierUse == true)
+		self->client->resp.soldierUse = false;
+	if (self->client->resp.heavyUse == true)
+		self->client->resp.heavyUse = false;
 	if (self->client->resp.sniperUse == true)
 		self->client->resp.sniperUse = false;
 
@@ -641,12 +836,15 @@ void InitClientPersistant (gclient_t *client)
         item = FindItem("Blaster");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
+
         item = FindItem("Combat Armor");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 50;
+
         item = FindItem("Bullets");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 300;
+
         item = FindItem("Chaingun");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
@@ -668,12 +866,15 @@ void InitClientPersistant (gclient_t *client)
         item = FindItem("Blaster");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
+
         item = FindItem("Combat Armor");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 50;
+
         item = FindItem("Slugs");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 30;
+
         item = FindItem("Sniper Rifle");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
@@ -685,7 +886,7 @@ void InitClientPersistant (gclient_t *client)
 
 		client->resp.classVar = 5;
     }
-	else if (client->resp.classVar == 4)
+	else if (client->resp.classVar == 4 || client->resp.mutantUse == true)
     {
         //Class 4 (Mutant)
         gitem_t         *item;
@@ -695,27 +896,31 @@ void InitClientPersistant (gclient_t *client)
         item = FindItem("IR Goggles");
 		client->pers.selected_item = ITEM_INDEX(item);
 		client->pers.inventory[client->pers.selected_item] = 1;
+
 		item = FindItem("Blaster");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
+
         item = FindItem("Combat Armor");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 50;
+
         item = FindItem("Cells");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 30;
+
 		item = FindItem("Hyperblaster");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
 
         client->pers.weapon = item;
 
-		client->pers.health			= 999;
+		client->pers.health			= 500;
 		client->pers.max_health		= 999;
 
 		client->resp.classVar = 5;
     }
-    else if (client->resp.classVar < 1 || client->resp.classVar == 5)
+    else if ((client->resp.classVar < 1 || client->resp.classVar == 5) && client->resp.mutantUse == false)
     {
         //Observer mode, doesn't really matter what they have
         gitem_t         *item;
@@ -1203,6 +1408,35 @@ void spectator_respawn (edict_t *ent)
 //==============================================================
 
 
+void modelChange (edict_t *ent)
+{
+	if (ent->client->resp.mutantUse == true)
+	{
+		gi.bprintf(PRINT_HIGH, "You're a mutant!");
+		if (ent->client->resp.levelMutant == 1)
+		{
+			ent->s.modelindex = gi.modelindex ("models/monsters/boss1/tris.md2");
+			//ent->model = "models/monsters/boss1/tris.md2";
+			gi.bprintf(PRINT_HIGH, "Level One!");
+			//gi.linkentity (ent);
+		}
+		else if (ent->client->resp.levelMutant == 2)
+		{
+			ent->s.modelindex = gi.modelindex ("models/monsters/boss2/tris.md2");
+			//ent->model = "models/monsters/boss2/tris.md2";
+			gi.bprintf(PRINT_HIGH, "Level Two!");
+			//gi.linkentity (ent);
+		}
+		else if (ent->client->resp.levelMutant == 3)
+		{
+			ent->s.modelindex = gi.modelindex ("models/monsters/boss3/jorg/tris.md2");
+			//ent->model = "models/monsters/boss3/jorg/tris.md2";
+			gi.bprintf(PRINT_HIGH, "Level Three!");
+			//gi.linkentity (ent);
+		}
+	}
+}
+
 /*
 ===========
 PutClientInServer
@@ -1222,6 +1456,7 @@ void PutClientInServer (edict_t *ent)
 	client_persistant_t	saved;
 	client_respawn_t	resp;
 	int					classSave;
+	int					lvlSave;
 
 	// find a spawn point
 	// do it before setting health back up, so farthest
@@ -1239,6 +1474,7 @@ void PutClientInServer (edict_t *ent)
 		resp = client->resp;
 		memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 		InitClientPersistant (client);
+		modelChange(ent);
 		ClientUserinfoChanged (ent, userinfo);
 	}
 	else if (coop->value)
@@ -1266,8 +1502,10 @@ void PutClientInServer (edict_t *ent)
 		memset (&resp, 0, sizeof(resp));
 	}
 
-	// clear everything but the persistant data and classVar
+	// clear everything but the persistant data
+	//save special variables
 	classSave = client->resp.classVar;
+	lvlSave = client->resp.levelMutant;
 	saved = client->pers;
 	memset (client, 0, sizeof(*client));
 	client->pers = saved;
@@ -1275,6 +1513,7 @@ void PutClientInServer (edict_t *ent)
 		InitClientPersistant(client);
 	client->resp = resp;
 	client->resp.classVar = classSave;
+	client->resp.levelMutant = lvlSave;
 
 	// copy some data from the client to the entity
 	FetchClientEntData (ent);
@@ -1292,7 +1531,11 @@ void PutClientInServer (edict_t *ent)
 	ent->deadflag = DEAD_NO;
 	ent->air_finished = level.time + 12;
 	ent->clipmask = MASK_PLAYERSOLID;
+
+	//modelChange(ent);
 	ent->model = "players/male/tris.md2";
+	//gi.centerprintf(ent, "Reset model  :(");
+
 	ent->pain = player_pain;
 	ent->die = player_die;
 	ent->waterlevel = 0;
@@ -1422,6 +1665,14 @@ deathmatch mode, so clear everything out before starting them.
 */
 void ClientBeginDeathmatch (edict_t *ent)
 {
+	static qboolean Ghost_Spawned=false; //<=== NEW LINE HERE
+	// Create Ghost on first Player connect.
+	if ((sv_mutantplayer->value==1.0) && !Ghost_Spawned) 
+	{
+		Create_Ghost();
+		Ghost_Spawned=true;
+	}
+
 	G_InitEdict (ent);
 
 	InitClientResp (ent->client);
@@ -1727,7 +1978,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	int		i, j;
 	pmove_t	pm;
 	int			numPlayer;
-	int			numObserve;
+	int			numTotal;
+	qboolean	mutantExist;
 
 	level.current_entity = ent;
 	client = ent->client;
@@ -1976,7 +2228,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			UpdateChaseCam(other);
 	}
 
-	// Check to see if player pressing the "use" key
+	// Check to see if player pressing the "use" key for the grapple
     if (ent->client->buttons & BUTTON_USE && !ent->deadflag && client->hook_frame <= level.framenum)
     {     
 		if (client->resp.mutantUse == true && level.prepTimerOver == true)
@@ -1988,23 +2240,30 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	// check how many remaining players are in the game
-	for (i = 1, numPlayer = 0, numObserve = 0; i <= maxclients->value; i++)
+	/*for (i = 1, numPlayer = 0, numTotal = 0, mutantExist = false; i <= maxclients->value; i++)
 	{
 		if (g_edicts[i].inuse)
 		{
-			numPlayer++;
-			if (g_edicts[i].client->resp.classVar < 1)
-				numObserve++;
+			numTotal++;
+			if (client->resp.soldierUse == true || client->resp.heavyUse == true || client->resp.sniperUse == true)
+				numPlayer++;
+			if (client->resp.mutantUse == true)
+				mutantExist = true;
 		}
-	}
+	}*/
+
+	/*if (level.prepTimerOver == true && client->resp.classVar != 0 && !mutantExistance())
+		gi.bprintf(PRINT_HIGH, "Choosing mutant\n\n");
+		mutantChoice();*/
+	
 
 	//if monster is left alive, restart prepTimerOver
-	/*if (client->resp.classVar == 4 && (numPlayer - numObserve) == 1)
+	/*if (client->resp.classVar == 4 && numPlayer == 0 && numTotal != 1)
 	{
 		gi.centerprintf(ent, "Mutation Victorious!");
 		level.prepTimerOver = false;
 	}*/
-	
+
 	//restart level when someone wins
 	if (level.prepTimerOver == false && (level.prepTimer == 0))
 		EndObserverMode(ent);
@@ -2013,32 +2272,27 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	if (level.prepTimerOver == true && client->resp.classVar != 0 && client->resp.classVar != 5)
 	{
 		EndObserverMode(ent);
-	}
-
-	if (level.prepTimerOver == false)
-	{
-		if (client->resp.classVar == 1)
-			gi.centerprintf(ent, "CLASS: Soldier");
-		if (client->resp.classVar == 2)
-			gi.centerprintf(ent, "CLASS: Heavy  ");
-		if (client->resp.classVar == 3)
-			gi.centerprintf(ent, "CLASS: Sniper ");
-		if (client->resp.classVar == 4)
-			gi.centerprintf(ent, "CLASS: Mutant ");
-	}
+	}	
 	
-	
-	// Position tracker code
-	/*if(client->thinkdelay <= 0)
+	if(client->thinkdelay >= 10000 && level.prepTimerOver == true && client->resp.mutantUse == true)
 	{
-		client->thinkdelay = 100;
-		//think slowly
-		gi.centerprintf(ent, "position: (%0.4f,%0.4f,%0.4f)", ent->s.origin[0], ent->s.origin[1], ent->s.origin[2]);
+		client->thinkdelay = 0;
+		if (client->resp.levelMutant == 1)
+		{
+			client->resp.levelMutant = 2;
+			EndObserverMode(ent);
+		}
+		if (client->resp.levelMutant == 2)
+		{
+			client->resp.levelMutant = 3;
+			EndObserverMode(ent);
+		}
+		//gi.centerprintf(ent, "Time till Level Up: %i", client->thinkdelay);
 	}
 	else
 	{
-		client->thinkdelay--;
-	}*/
+		client->thinkdelay++;
+	}
 }
 
 
