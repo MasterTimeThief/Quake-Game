@@ -956,8 +956,6 @@ struct gclient_s
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
-	int			goggles;
-	int			goggledrain;
 	int			thinkdelay;
 
 	int			passiveon;
@@ -1125,5 +1123,3 @@ struct edict_s
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
 };
-
-void Use_IRGoggles (edict_t *ent, gitem_t *item);

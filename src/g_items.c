@@ -36,6 +36,19 @@ static int	quad_drop_timeout_hack;
 
 //======================================================================
 
+void Use_Healthpack (edict_t *ent, gitem_t *item)
+{
+	if (ent->health<200)
+	{
+		ent->health+=20;
+		ent->client->pers.inventory[ITEM_INDEX(item)]--;
+		ValidateSelectedItem (ent);
+	}
+	else
+		return;
+}
+
+
 /*
 ===============
 GetItemByIndex
@@ -1319,30 +1332,6 @@ gitem_t	itemlist[] =
 /* precache */ "misc/power2.wav misc/power1.wav"
 	},
 
-/* item_irgoggles - added by nobody */
-    {
-        "item_irgoggles",
-        Pickup_Powerup,
-        Use_IRGoggles,
-        NULL,
-        NULL,
-        "items/pkup.wav",
-        "models/ammo/nuke/tris.md2", EF_ROTATE,
-        NULL,
-        "k_comhead",
-        "IR Goggles",
-        2,
-        60,
-        NULL,
-        IT_POWERUP,
-        0,
-        NULL,
-        0,
-        ""
-    },
-
-
-
 
 
 	//
@@ -2301,23 +2290,4 @@ void SetItemNames (void)
 	body_armor_index   = ITEM_INDEX(FindItem("Body Armor"));
 	power_screen_index = ITEM_INDEX(FindItem("Power Screen"));
 	power_shield_index = ITEM_INDEX(FindItem("Power Shield"));
-}
-
-/*
-=================
-Use_IRGoggles
-=================
-*/
-void Use_IRGoggles (edict_t *ent, gitem_t *item)
-{
-    if (ent->client->goggles) // we're on
-    {
-        ent->client->goggles = 0;
-        ent->client->ps.rdflags &= ~RDF_IRGOGGLES;
-    }
-    else // we're off
-    {
-        ent->client->goggles = 1;
-        ent->client->ps.rdflags |= RDF_IRGOGGLES;
-    }
 }

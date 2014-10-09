@@ -96,8 +96,6 @@ void Ghost_Think(edict_t *Ghost)
 	vec3_t up;
 	edict_t *fPlayer=NULL;
 
-
-	gi.bprintf(PRINT_HIGH, "Ghost Think\n");
 	// Unlink Ghost if intermission..
 	if (level.intermissiontime >= level.time) 
 	{
@@ -108,17 +106,15 @@ void Ghost_Think(edict_t *Ghost)
 	// Check Scoreboard every 1 sec.
 	if (Ghost->delay <= level.time) 
 	{
-		gi.bprintf(PRINT_HIGH, "Search Mutant\n");
 		fPlayer=mutantEnt();
 		Ghost->delay =level.time + 0.1; 
 	}
-	gi.bprintf(PRINT_HIGH, "End Search\n");
+
 	// Move Ghost above fPlayer.
 	if ((fPlayer!=NULL)) 
 	{
 		if (G_ClientInGame(fPlayer))
 		{
-			gi.bprintf(PRINT_HIGH, "Move It\n");
 			Ghost->svflags &= ~SVF_NOCLIENT; // Turn ON Ghost
 			AngleVectors(fPlayer->s.angles, NULL, NULL, up);
 			VectorMA(fPlayer->s.origin, 60, up, start);
@@ -129,7 +125,6 @@ void Ghost_Think(edict_t *Ghost)
 	else
 		// No fPlayer to follow so..
 		// turn OFF Ghost temporarily
-		gi.bprintf(PRINT_HIGH, "Null?\n");
 		Ghost->nextthink = level.time + 0.1; // Every frame..
 }
 
@@ -893,10 +888,6 @@ void InitClientPersistant (gclient_t *client)
 
         memset (&client->pers, 0, sizeof(client->pers));
 
-        item = FindItem("IR Goggles");
-		client->pers.selected_item = ITEM_INDEX(item);
-		client->pers.inventory[client->pers.selected_item] = 1;
-
 		item = FindItem("Blaster");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
@@ -905,11 +896,11 @@ void InitClientPersistant (gclient_t *client)
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 50;
 
-        item = FindItem("Cells");
+        item = FindItem("Shells");
         client->pers.selected_item = ITEM_INDEX(item);
-        client->pers.inventory[client->pers.selected_item] = 30;
+        client->pers.inventory[client->pers.selected_item] = 50;
 
-		item = FindItem("Hyperblaster");
+		item = FindItem("Shotgun");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
 
@@ -2139,25 +2130,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			VectorCopy (pm.viewangles, client->v_angle);
 			VectorCopy (pm.viewangles, client->ps.viewangles);
-		}
-
-		// PSY: GOGGLES DRAIN
-		if (client->goggles)
-		{
-			if (client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] >= 1)
-			{
-				client->goggledrain++;
-				if (client->goggledrain == 10)
-				{
-					client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] -= 1;
-					client->goggledrain = 0;
-				}
-			}
-			else
-			{
-				client->ps.rdflags &= ~RDF_IRGOGGLES;
-				client->goggles = 0;
-			}
 		}
 
 		gi.linkentity (ent);
