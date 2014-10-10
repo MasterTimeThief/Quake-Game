@@ -290,7 +290,7 @@ void CheckDMRules (void)
 
 
 	int			timerValue;
-	timerValue = 100;
+	timerValue = 10;
 
 	if (level.intermissiontime)
 		return;
@@ -325,6 +325,8 @@ void CheckDMRules (void)
 				gi.bprintf(PRINT_HIGH, "\n\n60 Seconds Remaining\n"); // 60
 			if (timerValue - level.prepTimer == 300)
 				gi.bprintf(PRINT_HIGH, "\n\n30 Seconds Remaining\n"); // 30
+			if (timerValue - level.prepTimer == 200)
+				gi.bprintf(PRINT_HIGH, "\n\n20 Seconds Remaining\n"); // 30
 			if (timerValue - level.prepTimer == 100)
 				gi.bprintf(PRINT_HIGH, "\n\n10 Seconds Remaining\n"); // 10
 			if (timerValue - level.prepTimer == 50)

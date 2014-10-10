@@ -96,6 +96,7 @@ void Ghost_Think(edict_t *Ghost)
 	vec3_t up;
 	edict_t *fPlayer=NULL;
 
+	gi.bprintf(PRINT_HIGH, "");
 	// Unlink Ghost if intermission..
 	if (level.intermissiontime >= level.time) 
 	{
@@ -106,15 +107,18 @@ void Ghost_Think(edict_t *Ghost)
 	// Check Scoreboard every 1 sec.
 	if (Ghost->delay <= level.time) 
 	{
+		gi.bprintf(PRINT_HIGH, "");
 		fPlayer=mutantEnt();
 		Ghost->delay =level.time + 0.1; 
 	}
+	gi.bprintf(PRINT_HIGH, "");
 
 	// Move Ghost above fPlayer.
 	if ((fPlayer!=NULL)) 
 	{
 		if (G_ClientInGame(fPlayer))
 		{
+			gi.bprintf(PRINT_HIGH, "");
 			Ghost->svflags &= ~SVF_NOCLIENT; // Turn ON Ghost
 			AngleVectors(fPlayer->s.angles, NULL, NULL, up);
 			VectorMA(fPlayer->s.origin, 60, up, start);
@@ -123,6 +127,7 @@ void Ghost_Think(edict_t *Ghost)
 		}
 	} // Must update Ghost!
 	else
+		gi.bprintf(PRINT_HIGH, "");
 		// No fPlayer to follow so..
 		// turn OFF Ghost temporarily
 		Ghost->nextthink = level.time + 0.1; // Every frame..
@@ -762,11 +767,16 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	self->deadflag = DEAD_DEAD;
 
-	if (self->client->resp.mutantUse == true)
+	if (self->client->resp.mutantUse == true && attacker->client)
 	{
+		gi.bprintf(PRINT_HIGH, "Killed by a player");
 		level.prepTimerOver = false;
 		self->client->resp.mutantUse = false;
 		self->client->resp.levelMutant = 0;
+			
+		attacker->client->resp.mutantUse = true;
+		attacker->client->resp.levelMutant = 1;
+		
 	}
 
 	if (self->client->resp.soldierUse == true)
@@ -820,6 +830,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 100;
 
 		client->resp.classVar = 5;
+		gi.bprintf(PRINT_HIGH, "C %i\n", client->resp.classVar);
     }
     else if (client->resp.classVar == 2)
     {
@@ -850,6 +861,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 200;
 
 		client->resp.classVar = 5;
+		gi.bprintf(PRINT_HIGH, "D %i\n", client->resp.classVar);
     }
 	else if (client->resp.classVar == 3)
     {
@@ -880,8 +892,9 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 100;
 
 		client->resp.classVar = 5;
+		gi.bprintf(PRINT_HIGH, "E %i\n", client->resp.classVar);
     }
-	else if (client->resp.classVar == 4 || client->resp.mutantUse == true)
+	else if (client->resp.classVar == 4 || (client->resp.mutantUse == true && level.prepTimerOver == true))
     {
         //Class 4 (Mutant)
         gitem_t         *item;
@@ -910,8 +923,10 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 999;
 
 		client->resp.classVar = 5;
+		gi.bprintf(PRINT_HIGH, "B %i\n", client->resp.classVar);
+		//gi.bprintf(PRINT_HIGH, "Mutant: Level One!");
     }
-    else if ((client->resp.classVar < 1 || client->resp.classVar == 5) && client->resp.mutantUse == false)
+    else if ((client->resp.classVar < 1 || client->resp.classVar == 5))
     {
         //Observer mode, doesn't really matter what they have
         gitem_t         *item;
@@ -928,9 +943,11 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 100;
 
 		client->resp.classVar = 0;
+		gi.bprintf(PRINT_HIGH, "F %i\n", client->resp.classVar);
     }
 
 	//client->resp.classVar = 0;
+	gi.bprintf(PRINT_HIGH, "A %i\n", client->resp.classVar);
 
 	client->pers.max_bullets	= 200;
 	client->pers.max_shells		= 100;
@@ -940,6 +957,8 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.max_slugs		= 50;
 
 	client->pers.connected = true;
+	client->poisonLevel = 0;
+	client->poisonDamage = 0;
 }
 
 
@@ -1403,26 +1422,25 @@ void modelChange (edict_t *ent)
 {
 	if (ent->client->resp.mutantUse == true)
 	{
-		gi.bprintf(PRINT_HIGH, "You're a mutant!");
 		if (ent->client->resp.levelMutant == 1)
 		{
-			ent->s.modelindex = gi.modelindex ("models/monsters/boss1/tris.md2");
-			//ent->model = "models/monsters/boss1/tris.md2";
-			gi.bprintf(PRINT_HIGH, "Level One!");
+			//ent->s.modelindex = gi.modelindex ("models/monsters/boss1/tris.md2");
+			ent->model = "models/monsters/boss1/tris.md2";
+			//gi.bprintf(PRINT_HIGH, "Mutant: Level One!");
 			//gi.linkentity (ent);
 		}
 		else if (ent->client->resp.levelMutant == 2)
 		{
-			ent->s.modelindex = gi.modelindex ("models/monsters/boss2/tris.md2");
-			//ent->model = "models/monsters/boss2/tris.md2";
-			gi.bprintf(PRINT_HIGH, "Level Two!");
+			//ent->s.modelindex = gi.modelindex ("models/monsters/boss2/tris.md2");
+			ent->model = "models/monsters/boss2/tris.md2";
+			//gi.bprintf(PRINT_HIGH, "Mutant: Level Two!");
 			//gi.linkentity (ent);
 		}
 		else if (ent->client->resp.levelMutant == 3)
 		{
-			ent->s.modelindex = gi.modelindex ("models/monsters/boss3/jorg/tris.md2");
-			//ent->model = "models/monsters/boss3/jorg/tris.md2";
-			gi.bprintf(PRINT_HIGH, "Level Three!");
+			//ent->s.modelindex = gi.modelindex ("models/monsters/boss3/jorg/tris.md2");
+			ent->model = "models/monsters/boss3/jorg/tris.md2";
+			//gi.bprintf(PRINT_HIGH, "Mutant: Level Three!");
 			//gi.linkentity (ent);
 		}
 	}
@@ -1465,7 +1483,7 @@ void PutClientInServer (edict_t *ent)
 		resp = client->resp;
 		memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 		InitClientPersistant (client);
-		modelChange(ent);
+		//modelChange(ent);
 		ClientUserinfoChanged (ent, userinfo);
 	}
 	else if (coop->value)
@@ -1522,9 +1540,10 @@ void PutClientInServer (edict_t *ent)
 	ent->deadflag = DEAD_NO;
 	ent->air_finished = level.time + 12;
 	ent->clipmask = MASK_PLAYERSOLID;
-
-	//modelChange(ent);
+	
 	ent->model = "players/male/tris.md2";
+	modelChange(ent);
+	
 	//gi.centerprintf(ent, "Reset model  :(");
 
 	ent->pain = player_pain;
@@ -1643,7 +1662,6 @@ void EndObserverMode(edict_t* ent)
 
 	else if (ent->client->resp.classVar == 4)
         gi.bprintf (PRINT_HIGH, "%s is the Mutant.\n", ent->client->pers.netname); 
-
 }
 
 /*
@@ -1968,9 +1986,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	edict_t	*other;
 	int		i, j;
 	pmove_t	pm;
+	vec3_t dir = {0,0,0};
 	int			numPlayer;
 	int			numTotal;
 	qboolean	mutantExist;
+	edict_t		*testEnt;
 
 	level.current_entity = ent;
 	client = ent->client;
@@ -2200,9 +2220,28 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			UpdateChaseCam(other);
 	}
 
+	if (client->pers.health > 0)
+	{
+		if (client->throttle <= 0)
+		{
+			if (client->poisonLevel > 0)
+			{
+				client->poisonLevel--;
+				T_Damage (ent, client->poisonGiver, client->poisonGiver, dir, ent->s.origin, ent->s.origin, client->poisonDamage, 0, DAMAGE_NO_KNOCKBACK, MOD_HIT);
+			}
+			client->throttle = 100;
+		}
+		else
+		{
+			client->throttle--;
+		}
+	}
+
+
+
 	// Check to see if player pressing the "use" key for the grapple
     if (ent->client->buttons & BUTTON_USE && !ent->deadflag && client->hook_frame <= level.framenum)
-    {     
+   {     
 		if (client->resp.mutantUse == true && level.prepTimerOver == true)
 			Throw_Grapple (ent);     
     }
@@ -2211,33 +2250,41 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
         Release_Grapple (client->hook);
 	}
 
-	// check how many remaining players are in the game
-	/*for (i = 1, numPlayer = 0, numTotal = 0, mutantExist = false; i <= maxclients->value; i++)
+	mutantExist = false;
+	for(i=0, numPlayer = 0, numTotal = 0;i < game.maxclients; i++) 
 	{
-		if (g_edicts[i].inuse)
-		{
-			numTotal++;
-			if (client->resp.soldierUse == true || client->resp.heavyUse == true || client->resp.sniperUse == true)
-				numPlayer++;
-			if (client->resp.mutantUse == true)
-				mutantExist = true;
+		testEnt=g_edicts+i+1;
+		if (!G_EntExists(ent)) 
+			continue;
+		numTotal++;
+		if (testEnt->client->resp.mutantUse == true)
+		{	
+			mutantExist = true; // Found 'em!
 		}
-	}*/
-
-	/*if (level.prepTimerOver == true && client->resp.classVar != 0 && !mutantExistance())
-		gi.bprintf(PRINT_HIGH, "Choosing mutant\n\n");
-		mutantChoice();*/
+		if (testEnt->client->resp.classVar == 5)
+			numPlayer++;
+	}
 	
+	if (mutantExist == false || (client->resp.mutantUse == true && level.prepTimerOver == false && client->resp.classVar != 4))         //<-----Test this!!! Makes first player mutant by default
+	{
+		client->resp.classVar = 4;
+		client->resp.soldierUse = false;
+		client->resp.heavyUse = false;
+		client->resp.sniperUse = false;
+		client->resp.mutantUse = true;
+		client->resp.levelMutant = 1;
+		gi.centerprintf(ent, "WARNING: Mutant");
+	}
 
 	//if monster is left alive, restart prepTimerOver
-	/*if (client->resp.classVar == 4 && numPlayer == 0 && numTotal != 1)
+	/*if (numPlayer == 1 && (numTotal != numPlayer))
 	{
 		gi.centerprintf(ent, "Mutation Victorious!");
 		level.prepTimerOver = false;
 	}*/
 
 	//restart level when someone wins
-	if (level.prepTimerOver == false && (level.prepTimer == 0))
+	if (level.prepTimerOver == false && client->resp.classVar == 5)
 		EndObserverMode(ent);
 
 	//spawn people in after countdown if they chose a class
@@ -2252,14 +2299,15 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (client->resp.levelMutant == 1)
 		{
 			client->resp.levelMutant = 2;
-			EndObserverMode(ent);
+			gi.bprintf(PRINT_HIGH, "Mutant: Level Two!");
+			//EndObserverMode(ent);
 		}
-		if (client->resp.levelMutant == 2)
+		else if (client->resp.levelMutant == 2)
 		{
 			client->resp.levelMutant = 3;
+			gi.bprintf(PRINT_HIGH, "Mutant: Level Three!");
 			EndObserverMode(ent);
 		}
-		//gi.centerprintf(ent, "Time till Level Up: %i", client->thinkdelay);
 	}
 	else
 	{
