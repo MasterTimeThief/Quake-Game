@@ -830,7 +830,6 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 100;
 
 		client->resp.classVar = 5;
-		gi.bprintf(PRINT_HIGH, "C %i\n", client->resp.classVar);
     }
     else if (client->resp.classVar == 2)
     {
@@ -861,7 +860,6 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 200;
 
 		client->resp.classVar = 5;
-		gi.bprintf(PRINT_HIGH, "D %i\n", client->resp.classVar);
     }
 	else if (client->resp.classVar == 3)
     {
@@ -892,7 +890,6 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 100;
 
 		client->resp.classVar = 5;
-		gi.bprintf(PRINT_HIGH, "E %i\n", client->resp.classVar);
     }
 	else if (client->resp.classVar == 4 || (client->resp.mutantUse == true && level.prepTimerOver == true))
     {
@@ -923,7 +920,6 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 999;
 
 		client->resp.classVar = 5;
-		gi.bprintf(PRINT_HIGH, "B %i\n", client->resp.classVar);
 		//gi.bprintf(PRINT_HIGH, "Mutant: Level One!");
     }
     else if ((client->resp.classVar < 1 || client->resp.classVar == 5))
@@ -943,11 +939,9 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 100;
 
 		client->resp.classVar = 0;
-		gi.bprintf(PRINT_HIGH, "F %i\n", client->resp.classVar);
     }
 
 	//client->resp.classVar = 0;
-	gi.bprintf(PRINT_HIGH, "A %i\n", client->resp.classVar);
 
 	client->pers.max_bullets	= 200;
 	client->pers.max_shells		= 100;
@@ -2251,10 +2245,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	mutantExist = false;
-	for(i=0, numPlayer = 0, numTotal = 0;i < game.maxclients; i++) 
+	for (i=0, numPlayer = 0, numTotal = 0; i<game.maxclients ; i++)
 	{
-		testEnt=g_edicts+i+1;
-		if (!G_EntExists(ent)) 
+		testEnt = &g_edicts[1+i];
+		if (!testEnt->inuse)
 			continue;
 		numTotal++;
 		if (testEnt->client->resp.mutantUse == true)
@@ -2265,7 +2259,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			numPlayer++;
 	}
 	
-	if (mutantExist == false || (client->resp.mutantUse == true && level.prepTimerOver == false && client->resp.classVar != 4))         //<-----Test this!!! Makes first player mutant by default
+	//Makes first player mutant by default
+	/*if (mutantExist == false || (client->resp.mutantUse == true && level.prepTimerOver == false && client->resp.classVar != 4))
 	{
 		client->resp.classVar = 4;
 		client->resp.soldierUse = false;
@@ -2274,14 +2269,15 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->resp.mutantUse = true;
 		client->resp.levelMutant = 1;
 		gi.centerprintf(ent, "WARNING: Mutant");
-	}
+	}*/
 
 	//if monster is left alive, restart prepTimerOver
-	/*if (numPlayer == 1 && (numTotal != numPlayer))
+	if (numPlayer == 1 && (numTotal != numPlayer))
 	{
+		
 		gi.centerprintf(ent, "Mutation Victorious!");
 		level.prepTimerOver = false;
-	}*/
+	}
 
 	//restart level when someone wins
 	if (level.prepTimerOver == false && client->resp.classVar == 5)
@@ -2293,20 +2289,20 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		EndObserverMode(ent);
 	}	
 	
-	if(client->thinkdelay >= 10000 && level.prepTimerOver == true && client->resp.mutantUse == true)
+	if(client->thinkdelay >= 100 && level.prepTimerOver == true && client->resp.mutantUse == true)
 	{
 		client->thinkdelay = 0;
 		if (client->resp.levelMutant == 1)
 		{
 			client->resp.levelMutant = 2;
-			gi.bprintf(PRINT_HIGH, "Mutant: Level Two!");
+			gi.bprintf(PRINT_HIGH, "Mutant: Level Two!\n");
 			//EndObserverMode(ent);
 		}
 		else if (client->resp.levelMutant == 2)
 		{
 			client->resp.levelMutant = 3;
-			gi.bprintf(PRINT_HIGH, "Mutant: Level Three!");
-			EndObserverMode(ent);
+			gi.bprintf(PRINT_HIGH, "Mutant: Level Three!\n");
+			//EndObserverMode(ent);
 		}
 	}
 	else

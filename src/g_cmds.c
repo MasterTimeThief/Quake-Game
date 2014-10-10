@@ -1035,7 +1035,7 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp (cmd, "soldier") == 0) // Soldier
 	{
-		if (level.prepTimerOver == false)
+		if (level.prepTimerOver == false && ent->client->resp.mutantUse == false)
 		{
 			ent->client->resp.classVar = 1;
 			ent->client->resp.soldierUse = true;
@@ -1047,7 +1047,7 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp (cmd, "heavy") == 0) // Heavy
 	{
-		if (level.prepTimerOver == false)
+		if (level.prepTimerOver == false && ent->client->resp.mutantUse == false)
 		{
 			ent->client->resp.classVar = 2;
 			ent->client->resp.soldierUse = false;
@@ -1059,7 +1059,7 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp (cmd, "sniper") == 0) // Sniper
 	{
-		if (level.prepTimerOver == false)
+		if (level.prepTimerOver == false && ent->client->resp.mutantUse == false)
 		{
 			ent->client->resp.classVar = 3;
 			ent->client->resp.soldierUse = false;

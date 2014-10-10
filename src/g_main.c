@@ -290,7 +290,7 @@ void CheckDMRules (void)
 
 
 	int			timerValue;
-	timerValue = 10;
+	timerValue = 100;
 
 	if (level.intermissiontime)
 		return;
