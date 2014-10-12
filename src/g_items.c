@@ -576,7 +576,6 @@ qboolean Pickup_Health (edict_t *ent, edict_t *other)
 		if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
 			SetRespawn (ent, 30);
 	}
-
 	return true;
 }
 
@@ -1056,8 +1055,12 @@ be on an entity that hasn't spawned yet.
 void SpawnItem (edict_t *ent, gitem_t *item)
 {
 	if (deathmatch->value) 
-    { 
-        if (strcmp(ent->classname, "weapon_shotgun") == 0) 
+    {
+		
+		G_FreeEdict (ent);
+		return;
+		/*
+		if (strcmp(ent->classname, "weapon_shotgun") == 0) 
         { 
             ent->classname = "ammo_shells"; 
             item = FindItemByClassname ("ammo_shells"); 
@@ -1109,7 +1112,8 @@ void SpawnItem (edict_t *ent, gitem_t *item)
         { 
             ent->classname = "ammo_cells"; 
             item = FindItemByClassname ("ammo_cells"); 
-        } 
+        }
+		*/
     }
 	
 	PrecacheItem (item);

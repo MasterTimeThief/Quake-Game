@@ -287,6 +287,7 @@ Fires a single blaster bolt.  Used by the blaster and hyper blaster.
 void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	int		mod;
+	int		lvlDamage;
 
 	if (other == self->owner)
 		return;
@@ -306,13 +307,21 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 			mod = MOD_HYPERBLASTER;
 		else
 			mod = MOD_BLASTER;
-		if (self->client->resp.mutantUse == false)
-			T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
-		else if (other->client != NULL && self->client->resp.mutantUse == true)
+
+		if (other->client != NULL)
 		{
-			other->client->poisonLevel += 500;
-			other->client->poisonDamage += 1;
-			other->client->poisonGiver = self;
+			T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
+			gi.centerprintf(self->owner, "you basic");
+			if (self->owner->client->resp.mutantUse == true)
+			{
+				lvlDamage = self->owner->client->resp.levelMutant;
+				lvlDamage *= 5;
+				other->client->poisonLevel += 10;
+				other->client->poisonDamage += lvlDamage;
+				other->client->poisonGiver = self;
+				gi.centerprintf(self->owner, "you pro");
+				gi.centerprintf(other, "You have been poisoned for %i damage!", self->owner->client->resp.levelMutant);
+			}
 		}
 	}
 	else
@@ -456,32 +465,43 @@ static void Grenade_Explode (edict_t *ent)
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
-	mutant = G_Spawn();
-	VectorCopy(ent->s.origin,mutant->s.origin);
-	mutant->s.origin[2] += 25;
 
-	SP_monster_mutant(mutant);
-	for (i = 0;i < 10;i++)
-	{
-		tr = gi.trace(mutant->s.origin,mutant->mins,mutant->maxs,ent->s.origin,ent,MASK_SHOT);
-		if (tr.fraction < 1)
+	if ((ent->owner) && (ent->owner->client) && (ent->owner->client->live_pets < 4))
+	{	
+		mutant = G_Spawn();
+		VectorCopy(ent->s.origin,mutant->s.origin);
+		mutant->s.origin[2] += 25;
+
+		if (ent->owner->client->resp.levelMutant == 1) // Gunner
+			SP_monster_gunner(mutant);
+		if (ent->owner->client->resp.levelMutant == 2) // Mutant
+			SP_monster_mutant(mutant);
+		if (ent->owner->client->resp.levelMutant == 3) // Gladiator
+			SP_monster_gladiator(mutant);
+	
+		for (i = 0;i < 10;i++)
 		{
-			VectorAdd(tr.plane.normal,mutant->s.origin,mutant->s.origin);
+			tr = gi.trace(mutant->s.origin,mutant->mins,mutant->maxs,ent->s.origin,ent,MASK_SHOT);
+			if (tr.fraction < 1)
+			{
+				VectorAdd(tr.plane.normal,mutant->s.origin,mutant->s.origin);
+			}
+			else
+			{
+				break;
+			}
+		}
+		if (i == 10)
+		{
+			G_FreeEdict(mutant);
 		}
 		else
 		{
-			break;
+			mutant->team = ent->owner->team;
+			mutant->owner = ent->owner;
+			ent->owner->client->live_pets++;
+			gi.linkentity(mutant);
 		}
-	}
-	if (i == 10)
-	{
-		G_FreeEdict(mutant);
-	}
-	else
-	{
-		mutant->team = ent->owner->team;
-		mutant->owner = ent->owner;
-		gi.linkentity(mutant);
 	}
 
 	G_FreeEdict (ent);
@@ -648,6 +668,14 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
+
+	if (other->client && ent->owner->client->resp.mutantUse == true)
+		if (ent->owner->client->resp.levelMutant == 1)
+			other->client->elec_shock_framenum+=30;
+		if (ent->owner->client->resp.levelMutant == 1)
+			other->client->elec_shock_framenum+=60;
+		if (ent->owner->client->resp.levelMutant == 1)
+			other->client->elec_shock_framenum+=90;
 
 	G_FreeEdict (ent);
 }

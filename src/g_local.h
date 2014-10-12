@@ -956,7 +956,9 @@ struct gclient_s
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
-	int			thinkdelay;
+	int			levelTimer;
+	int			live_pets;
+	float		elec_shock_framenum;
 
 	int			passiveon;
 	int			passiveoff;

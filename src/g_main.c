@@ -290,7 +290,7 @@ void CheckDMRules (void)
 
 
 	int			timerValue;
-	timerValue = 100;
+	timerValue = 200;
 
 	if (level.intermissiontime)
 		return;
@@ -313,7 +313,7 @@ void CheckDMRules (void)
 		if (level.prepTimer >= timerValue) //when timer runs out
 		{
 			level.prepTimerOver = true;
-			gi.bprintf(PRINT_HIGH, "\n\n\n\n\n----BEGIN----\n");
+			gi.bprintf(PRINT_HIGH, "\n\n\n----BEGIN----\n");
 			level.prepTimer = 0;
 		}
 		else if (level.prepTimer < timerValue) //while timer has not run out yet
@@ -322,23 +322,23 @@ void CheckDMRules (void)
 
 			//Prints only on select times
 			if (timerValue - level.prepTimer == 600)
-				gi.bprintf(PRINT_HIGH, "\n\n60 Seconds Remaining\n"); // 60
+				gi.bprintf(PRINT_HIGH, "\n\n\n60 Seconds Remaining\n"); // 60
 			if (timerValue - level.prepTimer == 300)
-				gi.bprintf(PRINT_HIGH, "\n\n30 Seconds Remaining\n"); // 30
+				gi.bprintf(PRINT_HIGH, "\n\n\n30 Seconds Remaining\n"); // 30
 			if (timerValue - level.prepTimer == 200)
-				gi.bprintf(PRINT_HIGH, "\n\n20 Seconds Remaining\n"); // 30
+				gi.bprintf(PRINT_HIGH, "\n\n\n20 Seconds Remaining\n"); // 30
 			if (timerValue - level.prepTimer == 100)
-				gi.bprintf(PRINT_HIGH, "\n\n10 Seconds Remaining\n"); // 10
+				gi.bprintf(PRINT_HIGH, "\n\n\n10 Seconds Remaining\n"); // 10
 			if (timerValue - level.prepTimer == 50)
-				gi.bprintf(PRINT_HIGH, "\n\n5 Seconds Remaining\n");  // 5
+				gi.bprintf(PRINT_HIGH, "\n\n\n5 Seconds Remaining\n");  // 5
 			if (timerValue - level.prepTimer == 40)
-				gi.bprintf(PRINT_HIGH, "\n\n4 Seconds Remaining\n");  // 4
+				gi.bprintf(PRINT_HIGH, "\n\n\n4 Seconds Remaining\n");  // 4
 			if (timerValue - level.prepTimer == 30)
-				gi.bprintf(PRINT_HIGH, "\n\n3 Seconds Remaining\n");  // 3
+				gi.bprintf(PRINT_HIGH, "\n\n\n3 Seconds Remaining\n");  // 3
 			if (timerValue - level.prepTimer == 20)
-				gi.bprintf(PRINT_HIGH, "\n\n2 Seconds Remaining\n");  // 2
+				gi.bprintf(PRINT_HIGH, "\n\n\n2 Seconds Remaining\n");  // 2
 			if (timerValue - level.prepTimer == 10)
-				gi.bprintf(PRINT_HIGH, "\n\n1 Second  Remaining\n");   // 1
+				gi.bprintf(PRINT_HIGH, "\n\n\n1 Second  Remaining\n");   // 1
 
 		}
 	}

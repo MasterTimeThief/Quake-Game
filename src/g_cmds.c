@@ -903,7 +903,7 @@ void dropGrenade (edict_t *ent)
 	vec3_t	offset;
 	vec3_t	forward, right;
 	vec3_t	start;
-	int		damage = 125;
+	int		damage = 0;
 	float	timer;
 	int		speed;
 	float	radius;

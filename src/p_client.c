@@ -769,7 +769,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	if (self->client->resp.mutantUse == true && attacker->client)
 	{
-		gi.bprintf(PRINT_HIGH, "Killed by a player");
+		gi.centerprintf(self, "Killed by %s", attacker->client->pers.netname);
 		level.prepTimerOver = false;
 		self->client->resp.mutantUse = false;
 		self->client->resp.levelMutant = 0;
@@ -818,7 +818,7 @@ void InitClientPersistant (gclient_t *client)
 
         item = FindItem("Rockets");
         client->pers.selected_item = ITEM_INDEX(item);
-        client->pers.inventory[client->pers.selected_item] = 30;
+        client->pers.inventory[client->pers.selected_item] = 20;
 
         item = FindItem("Rocket Launcher");
         client->pers.selected_item = ITEM_INDEX(item);
@@ -906,11 +906,11 @@ void InitClientPersistant (gclient_t *client)
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 50;
 
-        item = FindItem("Shells");
+        item = FindItem("Rockets");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 50;
 
-		item = FindItem("Shotgun");
+        item = FindItem("Rocket Launcher");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
 
@@ -920,7 +920,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health		= 999;
 
 		client->resp.classVar = 5;
-		//gi.bprintf(PRINT_HIGH, "Mutant: Level One!");
+		gi.bprintf(PRINT_HIGH, "Mutant: Level One!\n");
     }
     else if ((client->resp.classVar < 1 || client->resp.classVar == 5))
     {
@@ -2214,6 +2214,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			UpdateChaseCam(other);
 	}
 
+
+	// Poison Damage
 	if (client->pers.health > 0)
 	{
 		if (client->throttle <= 0)
@@ -2245,6 +2247,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	mutantExist = false;
+	//gi.bprintf(PRINT_HIGH, "mutant search");
 	for (i=0, numPlayer = 0, numTotal = 0; i<game.maxclients ; i++)
 	{
 		testEnt = &g_edicts[1+i];
@@ -2253,14 +2256,17 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		numTotal++;
 		if (testEnt->client->resp.mutantUse == true)
 		{	
+			//gi.bprintf(PRINT_HIGH, "mutant!!");
 			mutantExist = true; // Found 'em!
+			numPlayer++;
 		}
-		if (testEnt->client->resp.classVar == 5)
+		if (testEnt->client->resp.soldierUse == true || testEnt->client->resp.heavyUse == true || testEnt->client->resp.sniperUse == true)
 			numPlayer++;
 	}
+	//gi.centerprintf(ent, "mutant not found");
 	
-	//Makes first player mutant by default
-	/*if (mutantExist == false || (client->resp.mutantUse == true && level.prepTimerOver == false && client->resp.classVar != 4))
+	//Makes first player mutant by default   [DISABLE FOR TESTING OTHER CLASSES]
+	if (mutantExist == false || (client->resp.mutantUse == true && level.prepTimerOver == false && client->resp.classVar != 4))
 	{
 		client->resp.classVar = 4;
 		client->resp.soldierUse = false;
@@ -2269,13 +2275,13 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->resp.mutantUse = true;
 		client->resp.levelMutant = 1;
 		gi.centerprintf(ent, "WARNING: Mutant");
-	}*/
+	}
 
 	//if monster is left alive, restart prepTimerOver
-	if (numPlayer == 1 && (numTotal != numPlayer))
+	if (numPlayer == 1 && (numTotal != numPlayer) && level.prepTimerOver == true)
 	{
 		
-		gi.centerprintf(ent, "Mutation Victorious!");
+		gi.bprintf(PRINT_HIGH, "\n\n\nMutation Victorious!\n");
 		level.prepTimerOver = false;
 	}
 
@@ -2289,25 +2295,23 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		EndObserverMode(ent);
 	}	
 	
-	if(client->thinkdelay >= 100 && level.prepTimerOver == true && client->resp.mutantUse == true)
+	if(client->levelTimer >= 500 && level.prepTimerOver == true && client->resp.mutantUse == true)
 	{
-		client->thinkdelay = 0;
+		client->levelTimer = 0;
 		if (client->resp.levelMutant == 1)
 		{
 			client->resp.levelMutant = 2;
 			gi.bprintf(PRINT_HIGH, "Mutant: Level Two!\n");
-			//EndObserverMode(ent);
 		}
 		else if (client->resp.levelMutant == 2)
 		{
 			client->resp.levelMutant = 3;
 			gi.bprintf(PRINT_HIGH, "Mutant: Level Three!\n");
-			//EndObserverMode(ent);
 		}
 	}
 	else
 	{
-		client->thinkdelay++;
+		client->levelTimer++;
 	}
 }
 
