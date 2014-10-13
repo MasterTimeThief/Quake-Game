@@ -168,6 +168,8 @@ void InitGame (void)
 	needpass = gi.cvar ("needpass", "0", CVAR_SERVERINFO);
 	filterban = gi.cvar ("filterban", "1", 0);
 
+	sv_mutantplayer=gi.cvar("sv_mutantplayer","1",CVAR_SERVERINFO);
+
 	g_select_empty = gi.cvar ("g_select_empty", "0", CVAR_ARCHIVE);
 
 	run_pitch = gi.cvar ("run_pitch", "0.002", 0);

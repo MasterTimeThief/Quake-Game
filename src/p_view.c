@@ -2,7 +2,7 @@
 #include "g_local.h"
 #include "m_player.h"
 
-
+void elecshock(edict_t *ent);
 
 static	edict_t		*current_player;
 static	gclient_t	*current_client;
@@ -471,6 +471,8 @@ void SV_CalcBlend (edict_t *ent)
 	ent->client->bonus_alpha -= 0.1;
 	if (ent->client->bonus_alpha < 0)
 		ent->client->bonus_alpha = 0;
+	if (ent->client->elec_shock_framenum > 0)
+		SV_AddBlend (0, 0, 1, 0.25, ent->client->ps.blend);
 }
 
 
@@ -1064,5 +1066,7 @@ void ClientEndServerFrame (edict_t *ent)
 		DeathmatchScoreboardMessage (ent, ent->enemy);
 		gi.unicast (ent, false);
 	}
+	if (ent->client->elec_shock_framenum)  // checks that it is greater than 0
+        elecshock(ent);                // The function for handling electrial shocks.
 }
 

@@ -556,6 +556,10 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
+	if ((self->owner) && (self->owner->client))
+	{
+		self->owner->client->live_pets--;
+	}
 	if (self->health <= self->gib_health)
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -591,11 +595,6 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 */
 void SP_monster_mutant (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
 
 	sound_swing = gi.soundindex ("mutant/mutatck1.wav");
 	sound_hit = gi.soundindex ("mutant/mutatck2.wav");

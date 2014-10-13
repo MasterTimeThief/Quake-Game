@@ -32,6 +32,7 @@ cvar_t	*filterban;
 
 cvar_t	*sv_maxvelocity;
 cvar_t	*sv_gravity;
+cvar_t	*sv_mutantplayer; // <== DECLARE VAR HERE
 
 cvar_t	*sv_rollspeed;
 cvar_t	*sv_rollangle;
@@ -287,6 +288,10 @@ void CheckDMRules (void)
 	int			i;
 	gclient_t	*cl;
 
+
+	int			timerValue;
+	timerValue = 200;
+
 	if (level.intermissiontime)
 		return;
 
@@ -300,6 +305,41 @@ void CheckDMRules (void)
 			gi.bprintf (PRINT_HIGH, "Timelimit hit.\n");
 			EndDMLevel ();
 			return;
+		}
+	}
+
+	if (level.prepTimerOver != true)
+	{
+		if (level.prepTimer >= timerValue) //when timer runs out
+		{
+			level.prepTimerOver = true;
+			gi.bprintf(PRINT_HIGH, "\n\n\n----BEGIN----\n");
+			level.prepTimer = 0;
+		}
+		else if (level.prepTimer < timerValue) //while timer has not run out yet
+		{
+			level.prepTimer++;
+
+			//Prints only on select times
+			if (timerValue - level.prepTimer == 600)
+				gi.bprintf(PRINT_HIGH, "\n\n\n60 Seconds Remaining\n"); // 60
+			if (timerValue - level.prepTimer == 300)
+				gi.bprintf(PRINT_HIGH, "\n\n\n30 Seconds Remaining\n"); // 30
+			if (timerValue - level.prepTimer == 200)
+				gi.bprintf(PRINT_HIGH, "\n\n\n20 Seconds Remaining\n"); // 30
+			if (timerValue - level.prepTimer == 100)
+				gi.bprintf(PRINT_HIGH, "\n\n\n10 Seconds Remaining\n"); // 10
+			if (timerValue - level.prepTimer == 50)
+				gi.bprintf(PRINT_HIGH, "\n\n\n5 Seconds Remaining\n");  // 5
+			if (timerValue - level.prepTimer == 40)
+				gi.bprintf(PRINT_HIGH, "\n\n\n4 Seconds Remaining\n");  // 4
+			if (timerValue - level.prepTimer == 30)
+				gi.bprintf(PRINT_HIGH, "\n\n\n3 Seconds Remaining\n");  // 3
+			if (timerValue - level.prepTimer == 20)
+				gi.bprintf(PRINT_HIGH, "\n\n\n2 Seconds Remaining\n");  // 2
+			if (timerValue - level.prepTimer == 10)
+				gi.bprintf(PRINT_HIGH, "\n\n\n1 Second  Remaining\n");   // 1
+
 		}
 	}
 

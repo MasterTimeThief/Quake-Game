@@ -319,6 +319,9 @@ typedef struct
 	int			body_que;			// dead bodies
 
 	int			power_cubes;		// ugly necessity for coop
+	qboolean	prepTimerOver;
+	int			prepTimer;
+	int			playersLeft;
 } level_locals_t;
 
 
@@ -479,6 +482,11 @@ extern	int	body_armor_index;
 #define MOD_TRIGGER_HURT	31
 #define MOD_HIT				32
 #define MOD_TARGET_BLASTER	33
+
+#define MOD_SNIPER_CHEST	34
+#define MOD_SNIPER_LEG		35
+#define MOD_SNIPER_HEAD		36
+
 #define MOD_FRIENDLY_FIRE	0x8000000
 
 extern	int	meansOfDeath;
@@ -511,6 +519,7 @@ extern	cvar_t	*filterban;
 
 extern	cvar_t	*sv_gravity;
 extern	cvar_t	*sv_maxvelocity;
+extern	cvar_t	*sv_mutantplayer; //<=== NEW VAR HERE
 
 extern	cvar_t	*gun_x, *gun_y, *gun_z;
 extern	cvar_t	*sv_rollspeed;
@@ -855,6 +864,12 @@ typedef struct
 	vec3_t		cmd_angles;			// angles sent over in the last command
 
 	qboolean	spectator;			// client is a spectator
+	int			classVar;				//added for the class variable
+	qboolean	soldierUse;
+	qboolean	heavyUse;
+	qboolean	sniperUse;
+	qboolean	mutantUse;
+	int			levelMutant;
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),
@@ -941,6 +956,24 @@ struct gclient_s
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
+	int			levelTimer;
+	int			live_pets;
+	float		elec_shock_framenum;
+
+	int			passiveon;
+	int			passiveoff;
+
+	//Grapple Variables
+	edict_t		*hook;        
+	edict_t		*hook_touch;  
+	qboolean	on_hook;      
+	int			hook_frame;
+
+	int			poisonLevel;	//how much poison in system
+	int			poisonDamage;    //how much damage per poison think
+	edict_t     *poisonGiver;	// the last person to inflict poison
+	int			throttle;
+
 };
 
 
@@ -1092,4 +1125,3 @@ struct edict_s
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
 };
-

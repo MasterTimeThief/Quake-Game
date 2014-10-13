@@ -16,6 +16,7 @@ void Weapon_Grenade (edict_t *ent);
 void Weapon_GrenadeLauncher (edict_t *ent);
 void Weapon_Railgun (edict_t *ent);
 void Weapon_BFG (edict_t *ent);
+void Weapon_SniperRifle (edict_t *ent);
 
 gitem_armor_t jacketarmor_info	= { 25,  50, .30, .00, ARMOR_JACKET};
 gitem_armor_t combatarmor_info	= { 50, 100, .60, .30, ARMOR_COMBAT};
@@ -34,6 +35,19 @@ void Use_Quad (edict_t *ent, gitem_t *item);
 static int	quad_drop_timeout_hack;
 
 //======================================================================
+
+void Use_Healthpack (edict_t *ent, gitem_t *item)
+{
+	if (ent->health<200)
+	{
+		ent->health+=20;
+		ent->client->pers.inventory[ITEM_INDEX(item)]--;
+		ValidateSelectedItem (ent);
+	}
+	else
+		return;
+}
+
 
 /*
 ===============
@@ -562,7 +576,6 @@ qboolean Pickup_Health (edict_t *ent, edict_t *other)
 		if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
 			SetRespawn (ent, 30);
 	}
-
 	return true;
 }
 
@@ -1041,6 +1054,68 @@ be on an entity that hasn't spawned yet.
 */
 void SpawnItem (edict_t *ent, gitem_t *item)
 {
+	if (deathmatch->value) 
+    {
+		
+		G_FreeEdict (ent);
+		return;
+		/*
+		if (strcmp(ent->classname, "weapon_shotgun") == 0) 
+        { 
+            ent->classname = "ammo_shells"; 
+            item = FindItemByClassname ("ammo_shells"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_supershotgun") == 0) 
+        { 
+            ent->classname = "ammo_shells"; 
+            item = FindItemByClassname ("ammo_shells"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_machinegun") == 0) 
+        { 
+            ent->classname = "ammo_bullets"; 
+            item = FindItemByClassname ("ammo_bullets"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_chaingun") == 0) 
+        { 
+            ent->classname = "ammo_bullets"; 
+            item = FindItemByClassname ("ammo_bullets"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_grenadelauncher") == 0) 
+        { 
+            ent->classname = "ammo_grenades"; 
+            item = FindItemByClassname ("ammo_grenades"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_rocketlauncher") == 0) 
+        { 
+            ent->classname = "ammo_rockets"; 
+            item = FindItemByClassname ("ammo_rockets"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_railgun") == 0) 
+        { 
+            ent->classname = "ammo_slugs"; 
+            item = FindItemByClassname ("ammo_slugs"); 
+        } 
+   
+        if (strcmp(ent->classname, "weapon_hyperblaster") == 0) 
+        { 
+            ent->classname = "ammo_cells"; 
+            item = FindItemByClassname ("ammo_cells"); 
+        } 
+
+        if (strcmp(ent->classname, "weapon_bfg") == 0) 
+        { 
+            ent->classname = "ammo_cells"; 
+            item = FindItemByClassname ("ammo_cells"); 
+        }
+		*/
+    }
+	
 	PrecacheItem (item);
 
 	if (ent->spawnflags)
@@ -1260,6 +1335,7 @@ gitem_t	itemlist[] =
 		0,
 /* precache */ "misc/power2.wav misc/power1.wav"
 	},
+
 
 
 	//
@@ -1519,6 +1595,30 @@ always owned, never in the world
 		0,
 /* precache */ "sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav weapons/bfg_hum.wav"
 	},
+
+/*QUAKED weapon_sniper (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+    {
+        "weapon_sniper",//weapon function 
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_SniperRifle,//corresponds with the top of g_items.c
+        "misc/w_pkup.wav",
+        "models/weapons/g_rail/tris.md2", EF_ROTATE,//rotating model
+        "models/weapons/v_rail/tris.md2",//model as seen in your hand
+/* icon */        "w_railgun",
+/* pickup */    "Sniper Rifle",
+        0,
+        1,//amount of ammo
+        "Slugs",//type of ammo
+        IT_WEAPON|IT_STAY_COOP,
+
+        WEAP_RAILGUN,//new line in 3.20
+        NULL,
+        0,
+/* precache */ "weapons/rg_hum.wav"
+    },
 
 	//
 	// AMMO ITEMS
