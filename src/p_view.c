@@ -472,7 +472,7 @@ void SV_CalcBlend (edict_t *ent)
 	if (ent->client->bonus_alpha < 0)
 		ent->client->bonus_alpha = 0;
 	if (ent->client->elec_shock_framenum > 0)
-		SV_AddBlend (0, 0, 1, 0.25, ent->client->ps.blend);
+		SV_AddBlend (1, 0, 0, 0.5, ent->client->ps.blend);
 }
 
 

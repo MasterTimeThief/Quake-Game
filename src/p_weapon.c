@@ -1476,3 +1476,44 @@ void Weapon_SniperRifle (edict_t *ent)
 }
 
 //======================================================================
+
+void weapon_healgun_fire(edict_t *ent)
+{
+	vec3_t         start;
+	vec3_t         end;
+	vec3_t         forward, right;
+	vec3_t         offset;
+	trace_t        tr;
+ 
+ 
+        
+	AngleVectors (ent->client->v_angle, forward, right, NULL);   
+	VectorSet(offset, 0, 7,  ent->viewheight-8);
+	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	VectorMA (start, 100, forward, end);
+	tr = gi.trace (start, NULL, NULL, end, ent, MASK_SHOT);
+	if (tr.fraction < 1.0)
+	{
+		if (tr.ent->client)
+		{
+			if (tr.ent->health<tr.ent->client->pers.max_health)
+			{
+				tr.ent->health+=1;
+				if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+					ent->client->pers.inventory[ent->client->ammo_index]--;
+			}
+		}
+		else
+			gi.cprintf(ent,PRINT_HIGH,"No-one there\n");
+		ent->client->ps.gunframe++;
+	}
+}
+ 
+
+void Weapon_Healgun(edict_t *ent)
+{
+	static int     pause_frames[] = {32, 0};
+	static int     fire_frames[]  = {9,11,13, 0};
+	
+	Weapon_Generic (ent, 8, 13, 49, 53, pause_frames, fire_frames, weapon_healgun_fire);
+}

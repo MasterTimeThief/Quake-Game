@@ -157,57 +157,6 @@ void Create_Ghost(void)
 	gi.linkentity(Ghost);
 }
 
-/*void mutantChoice(void) 
-{
-	int i, chosen, players = 0;
-	edict_t *ent;
-
-	// Search thru all clients
-	for(i=0;i < game.maxclients; i++) 
-	{
-		ent=g_edicts+i+1;
-		if (!G_EntExists(ent)) 
-			continue;
-		players++;
-	}
-
-	chosen = (rand()%(players - 1));//rand
-	gi.bprintf(PRINT_HIGH, "player chosen: %i", chosen);
-	ent=g_edicts+chosen+1;
-	ent->client->resp.classVar = 5;
-	ent->client->resp.soldierUse = false;
-	ent->client->resp.heavyUse = false;
-	ent->client->resp.sniperUse = false;
-	ent->client->resp.mutantUse = true;
-	ent->client->resp.levelMutant = 1;
-}
-
-qboolean mutantExistance(void) 
-{
-	int			i;
-	edict_t		*ent;
-	qboolean	check = false;
-
-	// Search thru all clients
-	for(i=0;i < game.maxclients; i++) 
-	{
-		ent=g_edicts+i+1;
-		if (!G_EntExists(ent)) 
-			continue;
-		if (ent->client->resp.mutantUse == true)
-			gi.bprintf(PRINT_HIGH, "Mutant exists\n");
-			check = true;
-	}
-	gi.bprintf(PRINT_HIGH, "Mutant absent\n");
-
-	return check;
-}
-
-int playerCount (void)
-{
-
-}*/
-
 static void SP_FixCoopSpots (edict_t *self)
 {
 	edict_t	*spot;
@@ -821,6 +770,14 @@ void InitClientPersistant (gclient_t *client)
         client->pers.inventory[client->pers.selected_item] = 20;
 
         item = FindItem("Rocket Launcher");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 1;
+
+		item = FindItem("Cells");
+        client->pers.selected_item = ITEM_INDEX(item);
+        client->pers.inventory[client->pers.selected_item] = 20;
+
+        item = FindItem("HealGun");
         client->pers.selected_item = ITEM_INDEX(item);
         client->pers.inventory[client->pers.selected_item] = 1;
 
@@ -1536,7 +1493,7 @@ void PutClientInServer (edict_t *ent)
 	ent->clipmask = MASK_PLAYERSOLID;
 	
 	ent->model = "players/male/tris.md2";
-	modelChange(ent);
+	//modelChange(ent);
 	
 	//gi.centerprintf(ent, "Reset model  :(");
 
@@ -1621,6 +1578,11 @@ void PutClientInServer (edict_t *ent)
 
 	// force the current weapon up
 	client->newweapon = client->pers.weapon;
+
+	ent->client->resp.maxSpeed = 300; // 300 is a slower running speed than max
+
+	//stuffcmd (ent, "cl_forwardspeed 150\n");
+	//stuffcmd (ent, "cl_sidespeed 150\n");
 	ChangeWeapon (ent);
 }
 
@@ -2247,23 +2209,20 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	mutantExist = false;
-	//gi.bprintf(PRINT_HIGH, "mutant search");
 	for (i=0, numPlayer = 0, numTotal = 0; i<game.maxclients ; i++)
 	{
 		testEnt = &g_edicts[1+i];
-		if (!testEnt->inuse)
+		if (!testEnt->inuse && !testEnt->client)
 			continue;
 		numTotal++;
 		if (testEnt->client->resp.mutantUse == true)
 		{	
-			//gi.bprintf(PRINT_HIGH, "mutant!!");
 			mutantExist = true; // Found 'em!
 			numPlayer++;
 		}
 		if (testEnt->client->resp.soldierUse == true || testEnt->client->resp.heavyUse == true || testEnt->client->resp.sniperUse == true)
 			numPlayer++;
 	}
-	//gi.centerprintf(ent, "mutant not found");
 	
 	//Makes first player mutant by default   [DISABLE FOR TESTING OTHER CLASSES]
 	if (mutantExist == false || (client->resp.mutantUse == true && level.prepTimerOver == false && client->resp.classVar != 4))
@@ -2276,18 +2235,30 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->resp.levelMutant = 1;
 		gi.centerprintf(ent, "WARNING: Mutant");
 	}
+	
 
 	//if monster is left alive, restart prepTimerOver
 	if (numPlayer == 1 && (numTotal != numPlayer) && level.prepTimerOver == true)
 	{
-		
 		gi.bprintf(PRINT_HIGH, "\n\n\nMutation Victorious!\n");
 		level.prepTimerOver = false;
+		EndObserverMode(ent);
 	}
+	
 
+	if (client->resp.heavyUse == true && ((ucmd->forwardmove > ent->client->resp.maxSpeed) || (ucmd->sidemove > ent->client->resp.maxSpeed)))
+	{
+		// cap the ucmd at the max speed
+		ucmd->forwardmove = ent->client->resp.maxSpeed;
+		ucmd->sidemove = ent->client->resp.maxSpeed;
+		// re-stuff the client variables
+		//stuffcmd (ent, "cl_forwardspeed 150\n");
+		//stuffcmd (ent, "cl_sidespeed 150\n");
+	}
 	//restart level when someone wins
 	if (level.prepTimerOver == false && client->resp.classVar == 5)
 		EndObserverMode(ent);
+ 
 
 	//spawn people in after countdown if they chose a class
 	if (level.prepTimerOver == true && client->resp.classVar != 0 && client->resp.classVar != 5)

@@ -870,6 +870,7 @@ typedef struct
 	qboolean	sniperUse;
 	qboolean	mutantUse;
 	int			levelMutant;
+	int			maxSpeed;
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),

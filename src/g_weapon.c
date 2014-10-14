@@ -672,9 +672,9 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	if (other->client && ent->owner->client->resp.mutantUse == true)
 		if (ent->owner->client->resp.levelMutant == 1)
 			other->client->elec_shock_framenum+=30;
-		if (ent->owner->client->resp.levelMutant == 1)
+		else if (ent->owner->client->resp.levelMutant == 2)
 			other->client->elec_shock_framenum+=60;
-		if (ent->owner->client->resp.levelMutant == 1)
+		else if (ent->owner->client->resp.levelMutant == 3)
 			other->client->elec_shock_framenum+=90;
 
 	G_FreeEdict (ent);

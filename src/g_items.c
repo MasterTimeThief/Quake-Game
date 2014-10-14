@@ -17,6 +17,7 @@ void Weapon_GrenadeLauncher (edict_t *ent);
 void Weapon_Railgun (edict_t *ent);
 void Weapon_BFG (edict_t *ent);
 void Weapon_SniperRifle (edict_t *ent);
+void Weapon_Healgun (edict_t *ent);
 
 gitem_armor_t jacketarmor_info	= { 25,  50, .30, .00, ARMOR_JACKET};
 gitem_armor_t combatarmor_info	= { 50, 100, .60, .30, ARMOR_COMBAT};
@@ -1619,6 +1620,27 @@ always owned, never in the world
         0,
 /* precache */ "weapons/rg_hum.wav"
     },
+
+	{
+        "weapon_heal", 
+        Pickup_Weapon,
+        Use_Weapon,                              //How to use
+        Drop_Weapon,
+        Weapon_Healgun,                            //What the function is
+        "misc/w_pkup.wav",
+        "models/weapons/g_hyperb/tris.md2",0,
+        "models/weapons/v_hyperb/tris.md2",      //The models stuff
+        "w_hyperblaster",                                     //Icon to be used
+        "HealGun",                                         //Pickup name
+        0,
+        0,
+        "cells",
+        IT_WEAPON,
+        WEAP_HYPERBLASTER,
+        NULL,
+        0,
+        ""
+        },
 
 	//
 	// AMMO ITEMS
