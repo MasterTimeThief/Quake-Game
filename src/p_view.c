@@ -840,8 +840,10 @@ void G_SetClientFrame (edict_t *ent)
 	gclient_t	*client;
 	qboolean	duck, run;
 
+	/*
 	if (ent->s.modelindex != 255)
 		return;		// not in the player model
+	*/
 
 	client = ent->client;
 

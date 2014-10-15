@@ -1533,6 +1533,12 @@ void PutClientInServer (edict_t *ent)
 	// clear entity state values
 	ent->s.effects = 0;
 	ent->s.modelindex = 255;		// will use the skin specified model
+
+	if (ent->client->resp.mutantUse == true)
+	{
+		ent->s.modelindex = gi.modelindex ("models/monsters/boss1/tris.md2");
+	}
+
 	ent->s.modelindex2 = 255;		// custom gun model
 	// sknum is player num and weapon number
 	// weapon number will be added in changeweapon
@@ -1573,17 +1579,13 @@ void PutClientInServer (edict_t *ent)
 	if (!KillBox (ent))
 	{	// could't spawn in?
 	}
-
-	gi.linkentity (ent);
+	
+	
 
 	// force the current weapon up
 	client->newweapon = client->pers.weapon;
-
-	ent->client->resp.maxSpeed = 300; // 300 is a slower running speed than max
-
-	//stuffcmd (ent, "cl_forwardspeed 150\n");
-	//stuffcmd (ent, "cl_sidespeed 150\n");
 	ChangeWeapon (ent);
+	gi.linkentity (ent);
 }
 
 void EndObserverMode(edict_t* ent) 
@@ -1606,18 +1608,6 @@ void EndObserverMode(edict_t* ent)
         gi.WriteByte (MZ_LOGIN);
         gi.multicast (ent->s.origin, MULTICAST_PVS);
     }
-
-    if (ent->client->resp.classVar == 1)
-        gi.bprintf (PRINT_HIGH, "%s is a Soldier.\n", ent->client->pers.netname); 
-
-    else if (ent->client->resp.classVar == 2)
-        gi.bprintf (PRINT_HIGH, "%s is a Heavy.\n", ent->client->pers.netname);
-
-	else if (ent->client->resp.classVar == 3)
-        gi.bprintf (PRINT_HIGH, "%s is a Sniper.\n", ent->client->pers.netname); 
-
-	else if (ent->client->resp.classVar == 4)
-        gi.bprintf (PRINT_HIGH, "%s is the Mutant.\n", ent->client->pers.netname); 
 }
 
 /*
@@ -1986,8 +1976,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		if (ent->movetype == MOVETYPE_NOCLIP)
 			client->ps.pmove.pm_type = PM_SPECTATOR;
-		else if (ent->s.modelindex != 255)
-			client->ps.pmove.pm_type = PM_GIB;
+		/*else if (ent->s.modelindex != 255)
+			client->ps.pmove.pm_type = PM_GIB;*/
 		else if (ent->deadflag)
 			client->ps.pmove.pm_type = PM_DEAD;
 		else
@@ -2239,22 +2229,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	//if monster is left alive, restart prepTimerOver
 	if (numPlayer == 1 && (numTotal != numPlayer) && level.prepTimerOver == true)
-	{
+	/*{
 		gi.bprintf(PRINT_HIGH, "\n\n\nMutation Victorious!\n");
 		level.prepTimerOver = false;
 		EndObserverMode(ent);
-	}
-	
+	}*/
 
-	if (client->resp.heavyUse == true && ((ucmd->forwardmove > ent->client->resp.maxSpeed) || (ucmd->sidemove > ent->client->resp.maxSpeed)))
-	{
-		// cap the ucmd at the max speed
-		ucmd->forwardmove = ent->client->resp.maxSpeed;
-		ucmd->sidemove = ent->client->resp.maxSpeed;
-		// re-stuff the client variables
-		//stuffcmd (ent, "cl_forwardspeed 150\n");
-		//stuffcmd (ent, "cl_sidespeed 150\n");
-	}
 	//restart level when someone wins
 	if (level.prepTimerOver == false && client->resp.classVar == 5)
 		EndObserverMode(ent);
