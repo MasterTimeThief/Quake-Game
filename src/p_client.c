@@ -735,6 +735,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->client->resp.sniperUse == true)
 		self->client->resp.sniperUse = false;
 
+	//
 	gi.linkentity (self);
 }
 

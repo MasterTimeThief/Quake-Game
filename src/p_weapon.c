@@ -1451,7 +1451,7 @@ void weapon_sniper_fire (edict_t *ent)
     
         VectorSet(offset, 0, 0, ent->viewheight-0);
         P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-        fire_sniper (ent, start, forward, damage, kick);
+        fire_sniper (ent, start, forward, damage, kick);  //mtl23 like my other comments, function should be declared at the top of the file
     
     // send muzzle flash
     gi.WriteByte (svc_muzzleflash);
