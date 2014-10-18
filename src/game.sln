@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "game.vcxproj", "{0F09BE34-2DE2-0F3B-19A0-227187F7C631}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "game.vcxproj", "{777E736D-7F5E-8C74-DA15-8A9E9570001D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,14 +11,14 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0F09BE34-2DE2-0F3B-19A0-227187F7C631}.Debug Alpha|Win32.ActiveCfg = Debug Alpha|Win32
-		{0F09BE34-2DE2-0F3B-19A0-227187F7C631}.Debug Alpha|Win32.Build.0 = Debug Alpha|Win32
-		{0F09BE34-2DE2-0F3B-19A0-227187F7C631}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0F09BE34-2DE2-0F3B-19A0-227187F7C631}.Debug|Win32.Build.0 = Debug|Win32
-		{0F09BE34-2DE2-0F3B-19A0-227187F7C631}.Release Alpha|Win32.ActiveCfg = Release Alpha|Win32
-		{0F09BE34-2DE2-0F3B-19A0-227187F7C631}.Release Alpha|Win32.Build.0 = Release Alpha|Win32
-		{0F09BE34-2DE2-0F3B-19A0-227187F7C631}.Release|Win32.ActiveCfg = Release|Win32
-		{0F09BE34-2DE2-0F3B-19A0-227187F7C631}.Release|Win32.Build.0 = Release|Win32
+		{777E736D-7F5E-8C74-DA15-8A9E9570001D}.Debug Alpha|Win32.ActiveCfg = Debug Alpha|Win32
+		{777E736D-7F5E-8C74-DA15-8A9E9570001D}.Debug Alpha|Win32.Build.0 = Debug Alpha|Win32
+		{777E736D-7F5E-8C74-DA15-8A9E9570001D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{777E736D-7F5E-8C74-DA15-8A9E9570001D}.Debug|Win32.Build.0 = Debug|Win32
+		{777E736D-7F5E-8C74-DA15-8A9E9570001D}.Release Alpha|Win32.ActiveCfg = Release Alpha|Win32
+		{777E736D-7F5E-8C74-DA15-8A9E9570001D}.Release Alpha|Win32.Build.0 = Release Alpha|Win32
+		{777E736D-7F5E-8C74-DA15-8A9E9570001D}.Release|Win32.ActiveCfg = Release|Win32
+		{777E736D-7F5E-8C74-DA15-8A9E9570001D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

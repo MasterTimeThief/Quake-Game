@@ -472,12 +472,12 @@ static void Grenade_Explode (edict_t *ent)
 		VectorCopy(ent->s.origin,mutant->s.origin);
 		mutant->s.origin[2] += 25;
 
-		if (ent->owner->client->resp.levelMutant == 1) // Gunner
-			SP_monster_gunner(mutant);
+		if (ent->owner->client->resp.levelMutant == 1) // Gunner 
+			SP_monster_gunner(mutant);                             //mtl23 this function should be delcared at the top of the file, then the error would go away //put his in line 3// void SP_monster_gunner (edict_t *self)
 		if (ent->owner->client->resp.levelMutant == 2) // Mutant
-			SP_monster_mutant(mutant);
+			SP_monster_mutant(mutant);								//mtl23 same as above
 		if (ent->owner->client->resp.levelMutant == 3) // Gladiator
-			SP_monster_gladiator(mutant);
+			SP_monster_gladiator(mutant);							//mtl23 same as above
 	
 		for (i = 0;i < 10;i++)
 		{
