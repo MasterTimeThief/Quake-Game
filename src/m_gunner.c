@@ -561,11 +561,14 @@ void gunner_refire_chain(edict_t *self)
 */
 void SP_monster_gunner (edict_t *self)
 {
+<<<<<<< HEAD
 	if (deathmatch->value)
 	{
 		G_FreeEdict (self);
 		return;
 	}
+=======
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 
 	sound_death = gi.soundindex ("gunner/death1.wav");	
 	sound_pain = gi.soundindex ("gunner/gunpain2.wav");	

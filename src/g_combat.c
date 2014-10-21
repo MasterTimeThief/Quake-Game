@@ -367,6 +367,15 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	if (!targ->takedamage)
 		return;
 
+<<<<<<< HEAD
+=======
+	if ((mod = MOD_R_SPLASH) && (targ == attacker) && (targ->client->resp.soldierUse == true))
+    {
+        damage = 0; // No Damage
+        knockback *= 1.2; // Rocket Jumping Jump Height * 1.2
+    }
+
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs

@@ -319,11 +319,14 @@ void gladiator_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 */
 void SP_monster_gladiator (edict_t *self)
 {
+<<<<<<< HEAD
 	if (deathmatch->value)
 	{
 		G_FreeEdict (self);
 		return;
 	}
+=======
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 
 
 	sound_pain1 = gi.soundindex ("gladiator/pain.wav");	

@@ -2,7 +2,11 @@
 #include "g_local.h"
 #include "m_player.h"
 
+<<<<<<< HEAD
 
+=======
+void elecshock(edict_t *ent);
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 
 static	edict_t		*current_player;
 static	gclient_t	*current_client;
@@ -471,6 +475,11 @@ void SV_CalcBlend (edict_t *ent)
 	ent->client->bonus_alpha -= 0.1;
 	if (ent->client->bonus_alpha < 0)
 		ent->client->bonus_alpha = 0;
+<<<<<<< HEAD
+=======
+	if (ent->client->elec_shock_framenum > 0)
+		SV_AddBlend (1, 0, 0, 0.5, ent->client->ps.blend);
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 }
 
 
@@ -838,8 +847,15 @@ void G_SetClientFrame (edict_t *ent)
 	gclient_t	*client;
 	qboolean	duck, run;
 
+<<<<<<< HEAD
 	if (ent->s.modelindex != 255)
 		return;		// not in the player model
+=======
+	/*
+	if (ent->s.modelindex != 255)
+		return;		// not in the player model
+	*/
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 
 	client = ent->client;
 
@@ -1064,5 +1080,10 @@ void ClientEndServerFrame (edict_t *ent)
 		DeathmatchScoreboardMessage (ent, ent->enemy);
 		gi.unicast (ent, false);
 	}
+<<<<<<< HEAD
+=======
+	if (ent->client->elec_shock_framenum)  // checks that it is greater than 0
+        elecshock(ent);                // The function for handling electrial shocks.
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 }
 

@@ -1,6 +1,10 @@
 // g_misc.c
 
 #include "g_local.h"
+<<<<<<< HEAD
+=======
+#include "grapple.h"
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 
 
 /*QUAKED func_group (0 0 0) ?
@@ -1787,6 +1791,11 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 	other->client->ps.pmove.pm_time = 160>>3;		// hold time
 	other->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
 
+<<<<<<< HEAD
+=======
+	other->client->hook_frame = level.framenum + 1;
+
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 	// draw the teleport splash at source and on the player
 	self->owner->s.event = EV_PLAYER_TELEPORT;
 	other->s.event = EV_PLAYER_TELEPORT;
@@ -1804,6 +1813,12 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 	// kill anything at the destination
 	KillBox (other);
 
+<<<<<<< HEAD
+=======
+	if (Is_Grappling(other->client))
+		Release_Grapple(other->client->hook);
+
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 	gi.linkentity (other);
 }
 

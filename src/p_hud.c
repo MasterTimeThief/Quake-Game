@@ -205,6 +205,12 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 			tag = "tag2";
 		else
 			tag = NULL;
+<<<<<<< HEAD
+=======
+
+		if (cl->resp.mutantUse == true)
+			tag = "tag2";
+>>>>>>> f3e790f3f8481397d291b0352cbcc441075e06a0
 		if (tag)
 		{
 			Com_sprintf (entry, sizeof(entry),
